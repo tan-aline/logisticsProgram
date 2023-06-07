@@ -1,7 +1,6 @@
 <!-- 司机详情 -->
 <template>
   <div class="dashboard-container driver-detail">
-
   </div>
 </template>
 <script>
