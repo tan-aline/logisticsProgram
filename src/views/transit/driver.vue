@@ -24,5 +24,10 @@ export default {
 /deep/ .el-card{
   overflow: initial;
 }
+.box {
+  width: 200px;
+  height: 200px;
+  background-color: red;
+}
 </style>
 
