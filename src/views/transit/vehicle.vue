@@ -15,7 +15,7 @@
             v-for="item in options"
             :key="item.id"
             :label="item.name"
-            :value="item.name"
+            :value="item.id"
           >
           </el-option>
         </el-select>
@@ -30,7 +30,10 @@
       </div>
 
       <div class="right">
-        <el-button type="danger">搜索</el-button>
+        <el-button
+          type="danger"
+          @click="search(value)"
+        >搜索</el-button>
         <el-button @click="reset">重置</el-button>
       </div>
     </div>
@@ -110,10 +113,11 @@
             label="操作"
             width="200"
           >
-            <template>
+            <template slot-scope="scope">
               <el-button
                 type="text"
                 size="small"
+                @click="ViewDetails(scope.row.id)"
               >查看详情</el-button>
               <el-button
                 type="text"
@@ -134,7 +138,7 @@
           :page-sizes="[5, 15, 20, 25]"
           :page-size="truckForm.pageSize"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="400"
+          :total="total"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
         >
@@ -148,35 +152,64 @@
       width="30%"
     >
       <el-form
+        ref="formLabelAlign"
         :label-position="labelPosition"
-        label-width="80px"
+        label-width="100px"
         :model="formLabelAlign"
+        :rules="rules"
       >
-        <el-form-item label="名称">
-          <el-input v-model="formLabelAlign.name"></el-input>
+        <el-form-item
+          label="车辆类型"
+          prop="truckTypeId"
+        >
+          <el-select
+            v-model="formLabelAlign.truckTypeId"
+            class="select"
+            placeholder="请选择"
+          >
+            <el-option
+              v-for="item in options"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
         </el-form-item>
-        <el-form-item label="活动区域">
-          <el-input v-model="formLabelAlign.region"></el-input>
+        <el-form-item
+          label="车辆号码"
+          prop="licensePlate"
+        >
+          <el-input
+            v-model="formLabelAlign.licensePlate"
+            placeholder="请输入车牌号码"
+          ></el-input>
         </el-form-item>
-        <el-form-item label="活动形式">
-          <el-input v-model="formLabelAlign.type"></el-input>
+        <el-form-item
+          label="GPS设备ID"
+          prop="deviceGpsId"
+        >
+          <el-input
+            v-model="formLabelAlign.deviceGpsId"
+            placeholder="请输入GPS设备ID"
+          ></el-input>
         </el-form-item>
       </el-form>
       <span
         slot="footer"
         class="dialog-footer"
       >
-        <el-button @click="dialogVisible = false">取 消</el-button>
         <el-button
           type="primary"
-          @click="dialogVisible = false"
+          @click="addTrucker"
         >确 定</el-button>
+        <el-button @click="resetTrucker">取 消</el-button>
       </span>
     </el-dialog>
   </div>
 </template>
 <script>
-import { getvehicles, getTruckTypeld, getUnusedTrucks, getUsedTrucks } from '@/api/vehicle'
+import { getvehicles, getTruckTypeld, addTrucker } from '@/api/vehicle'
 export default {
   name: 'Vehicle',
   data() {
@@ -192,13 +225,26 @@ export default {
       truckForm: {
         page: 1,
         pageSize: 5
+      },
+      labelPosition: 'right',
+      formLabelAlign: {
+        truckTypeId: null,
+        licensePlate: '',
+        deviceGpsId: ''
+      },
+      rules: {
+        licensePlate: [
+          { required: true, message: '请输入车牌号码', trigger: 'blur' },
+          { pattern: /^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-HJ-NP-Z][A-HJ-NP-Z0-9]{4,5}[A-HJ-NP-Z0-9挂学警港澳]$/, message: '车牌格式不正确', trigger: 'blur' }
+        ],
+        deviceGpsId: [{ required: true, message: '请输入GPS设备ID', trigger: 'blur' }]
       }
     }
   },
   created() {
     this.vehicle() // 车辆类型
-    // this.usable()// 可用车辆
-    // this.outOfservice()// 停用车辆
+    this.usable()// 可用车辆
+    this.outOfservice()// 停用车辆
     this.truck()// 全部
   },
   methods: {
@@ -210,7 +256,7 @@ export default {
     // 获取车辆类型列表  全部
     async truck() {
       const res = await getTruckTypeld(this.truckForm)
-      this.total = res.data.counts // 获取总数
+      this.total = Number(res.data.counts) // 获取总数
       this.tableData = res.data.items// 获取数组
     },
     // 重置车辆选择
@@ -218,21 +264,69 @@ export default {
       this.value = ''
       this.License = ''
     },
+    // 搜索车辆
+    async search(id) {
+      console.log(id)
+      const res = await getTruckTypeld({
+        page: this.truckForm.page,
+        pageSize: this.truckForm.pageSize,
+        truckTypeId: id,
+        licensePlate: this.License
+      })
+      this.total = Number(res.data.counts)
+      this.tableData = res.data.items
+    },
     // 可用的车辆
     async usable() {
-      const res = await getUsedTrucks()
-      this.usables = res.data.length
-      this.tableData = res.data// 获取数组
+      const res = await getTruckTypeld({
+        page: this.truckForm.page,
+        pageSize: this.truckForm.pageSize,
+        workStatus: 1
+      })
+      this.total = Number(res.data.counts)
+      this.usables = Number(res.data.counts)
+      this.tableData = res.data.items// 获取数组
     },
     // 停用的车辆
     async outOfservice() {
-      const res = await getUnusedTrucks()
-      this.service = res.data.length
-      this.tableData = res.data// 获取数组
+      const res = await getTruckTypeld({
+        page: this.truckForm.page,
+        pageSize: this.truckForm.pageSize,
+        workStatus: 0
+      })
+      this.total = Number(res.data.counts)
+      this.service = Number(res.data.counts)
+      this.tableData = res.data.items// 获取数组
     },
-    // 添加车辆
+    // 添加车辆弹框
     add() {
       this.dialogVisible = true
+    },
+    // 确认添加车辆
+    async addTrucker () {
+      await addTrucker(this.formLabelAlign)
+      this.$message.success('添加车辆成功')
+      this.resetTrucker()
+      this.truck() // 重新渲染页面
+    },
+    // 关闭添加车辆,清空数据
+    resetTrucker() {
+      this.dialogVisible = false // 关闭提示框
+      this.formLabelAlign = {
+        truckTypeId: null,
+        licensePlate: '',
+        deviceGpsId: ''
+      }
+    },
+    // 查看详情
+    ViewDetails(id) {
+      this.$router.push(
+        {
+          name: 'vehicle-detail',
+          query: {
+            id
+          }
+        })
     },
     setCurrent(row) {
       this.$refs.singleTable.setCurrentRow(row)
