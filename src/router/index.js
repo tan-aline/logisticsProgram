@@ -80,7 +80,7 @@ export const constantRoutes = [
         meta: { title: '订单管理', noCache: true }
       },
       {
-        path: 'edit-order',
+        path: 'edit-order/:id',
         component: () => import('@/views/order-manage/edit-order'),
         name: 'edit-order',
         hidden: true,
