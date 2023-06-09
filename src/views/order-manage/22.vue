@@ -17,7 +17,7 @@
                 <span>订单编号：
                   <em style="margin-left: 27px;">
                     {{ orderList.id }}</em></span>
-                <span>运单编号： <em>{{ orderList.transportOrder? orderList.transportOrder.id:'- -' }}</em></span>
+                <span>运单编号： <em>{{ orderList.transportOrder === ''? '- -': orderList.transportOrder.id }}</em></span>
                 <span>下单时间：
                   <em>{{ orderList.createTime }}</em></span>
                 <span>订单状态：
