@@ -144,7 +144,9 @@
           <el-input
             v-model.number="form.firstWeight"
             placeholder="请输入首重价格"
+            style="position:absolute;"
           ></el-input>
+          <span style="position:relative;float: right;left:-20px">元</span>
         </el-form-item>
 
         <el-form-item
@@ -154,11 +156,14 @@
           <el-input
             v-model.number="form.continuousWeight"
             placeholder="请输入续重价格"
+            style="position:absolute;"
           ></el-input>
+          <span style="position:relative;float: right;left:-20px">元</span>
+
         </el-form-item>
 
         <el-form-item
-          label="轻抛价格"
+          label="轻抛系数"
           prop="lightThrowingCoefficient"
         >
           <el-input
