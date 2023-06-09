@@ -1,8 +1,9 @@
 <!-- 司机详情，驾驶证信息 -->
 <template>
   <el-container
+    v-loading="loading"
     class="customer-details-box"
-    :class="isShow?'read':'edit'"
+    :class="isShow ? 'read' : 'edit'"
   >
     <el-card
       shadow="never"
@@ -20,7 +21,7 @@
               <el-input
                 v-model="driverLicens.licenseNumber"
                 :disabled="disabledLicenseNumber"
-                :placeholder="isShow?'--':'请输入驾驶证号'"
+                :placeholder="isShow ? '--' : '请输入驾驶证号'"
                 maxlength="40"
               />
             </div>
@@ -29,27 +30,31 @@
               <el-input
                 v-model="driverLicens.allowableType"
                 :disabled="disabledAllowableType"
-                :placeholder="isShow?'--':'请输入准驾车型'"
+                :placeholder="isShow ? '--' : '请输入准驾车型'"
                 maxlength="20"
               />
             </div>
-            <div class="form-item">
+            <div class="form-item data">
               <span class="span-title">初次领证日期：</span>
               <el-date-picker
                 v-model="driverLicens.initialCertificateDate"
                 type="date"
                 :disabled="disabledInitialCertificateDate"
                 value-format="yyyy-MM-dd"
-                :placeholder="isShow?'--':'请选择注册时间'"
+                :placeholder="isShow ? '--' : '请选择注册时间'"
               />
             </div>
             <div class="form-item">
               <span class="span-title">驾驶证有效期限：</span>
               <el-input
                 v-model="driverLicens.validPeriod"
-                :value="isShow ? driverLicens.validPeriod+'年': driverLicens.validPeriod"
+                :value="
+                  isShow
+                    ? driverLicens.validPeriod + '年'
+                    : driverLicens.validPeriod
+                "
                 :disabled="disabledValidPeriod"
-                :placeholder="isShow?'--':'请输入驾驶证有效期限'"
+                :placeholder="isShow ? '--' : '请输入驾驶证有效期限'"
                 maxlength="5"
               >
                 <span
@@ -69,9 +74,13 @@
               <span class="span-title">驾龄：</span>
               <el-input
                 v-model="driverLicens.driverAge"
-                :value="isShow?driverLicens.driverAge+' 年':driverLicens.driverAge"
+                :value="
+                  isShow
+                    ? driverLicens.driverAge + ' 年'
+                    : driverLicens.driverAge
+                "
                 :disabled="disabledDriverAge"
-                :placeholder="isShow?'--':'请输入驾龄'"
+                :placeholder="isShow ? '--' : '请输入驾龄'"
                 maxlength="5"
               >
                 <span
@@ -88,14 +97,11 @@
               </el-input>
             </div>
             <div class="form-item driver-license-type">
-              <span
-                class="span-title"
-                :style="{marginRight:isShow?'15px':'0px'}"
-              >驾驶证类型：</span>
+              <span class="span-title">驾驶证类型：</span>
               <el-input
                 v-model="driverLicens.licenseType"
                 :disabled="disabledLicenseType"
-                :placeholder="isShow?'--':'请输入驾驶证类型'"
+                :placeholder="isShow ? '--' : '请输入驾驶证类型'"
                 maxlength="5"
               />
             </div>
@@ -104,7 +110,7 @@
               <el-input
                 v-model="driverLicens.qualificationCertificate"
                 :disabled="disabledQualificationCertificate"
-                :placeholder="isShow?'--':'请输入从业资格证'"
+                :placeholder="isShow ? '--' : '请输入从业资格证'"
                 maxlength="20"
               />
             </div>
@@ -113,7 +119,7 @@
               <el-input
                 v-model="driverLicens.passCertificate"
                 :disabled="disabledPassCertificate"
-                :placeholder="isShow?'--':'请输入入场证信息'"
+                :placeholder="isShow ? '--' : '请输入入场证信息'"
                 maxlength="200"
               />
             </div>
@@ -123,7 +129,7 @@
         <div class="car-base car-img-base driver-licence">
           <span
             class="imgUpload-label"
-            style="margin-right:35px"
+            style="margin-right: 35px"
           >图片信息</span>
           <el-card
             shadow="never"
@@ -137,34 +143,49 @@
                 v-if="!isShow"
                 :prop-image-url="driverLicens.picture"
                 :disabled="isShow"
-                :edit-type="isShow?'read':'edit'"
+                :edit-type="isShow ? 'read' : 'edit'"
                 :is-show-example-img="diasbledImg"
-                :example-list="['https://yjy-slwl-oss.oss-cn-hangzhou.aliyuncs.com/f5b1a839-88ab-4af4-aba4-8b23320098a8.png','https://yjy-slwl-oss.oss-cn-hangzhou.aliyuncs.com/50dcaf77-01ae-424c-b4b2-2f5efb96791a.png']"
+                :example-list="[
+                  'https://yjy-slwl-oss.oss-cn-hangzhou.aliyuncs.com/f5b1a839-88ab-4af4-aba4-8b23320098a8.png',
+                  'https://yjy-slwl-oss.oss-cn-hangzhou.aliyuncs.com/50dcaf77-01ae-424c-b4b2-2f5efb96791a.png'
+                ]"
                 @imageChange="imageChange"
               >
-                注：图片大小不超过5M；仅能上传 PNG JPEG JPG类型图片；建议上传400*300尺寸的图片；最多上传2张
+                注：图片大小不超过5M；仅能上传 PNG JPEG
+                JPG类型图片；建议上传400*300尺寸的图片；最多上传2张
               </ImageUpload>
               <div
                 v-else
                 class="read-img"
-                style="margin-left:15px"
+                style="margin-left: 15px"
               >
                 <img
                   v-if="!driverLicens.picture.length"
                   src="../../../assets/empty-img.png"
-                  style="width:212px;height:159px;border: 1px solid #D8DDE3;border-radius: 4px;"
+                  style="
+                    width: 212px;
+                    height: 159px;
+                    border: 1px solid #d8dde3;
+                    border-radius: 4px;
+                  "
                 />
 
                 <div
-                  v-for="(item,index) in driverLicens.picture"
+                  v-for="(item, index) in driverLicens.picture"
                   v-else
                   :key="index"
                   class="img-box"
                 >
                   <img
-                    style="width:212px;height:159px;border: 1px solid #D8DDE3;border-radius: 4px;margin-right:20px"
+                    style="
+                      width: 212px;
+                      height: 159px;
+                      border: 1px solid #d8dde3;
+                      border-radius: 4px;
+                      margin-right: 20px;
+                    "
                     :src="item.url"
-                  >
+                  />
                   <div class="img-shadow">
                     <img
                       class="el-upload-span searchBigImg"
@@ -177,7 +198,6 @@
             </div>
           </el-card>
         </div>
-
       </div>
     </el-card>
     <div
@@ -203,7 +223,6 @@
       >保存</el-button>
       <el-button
         class="cancel-btn"
-        plain
         @click="handleCanDriverLicense()"
       >取消</el-button>
     </div>
@@ -217,15 +236,12 @@
         width="100%"
         :src="imageUrl"
         alt=""
-      >
+      />
     </el-dialog>
   </el-container>
 </template>
 <script>
-import {
-  driverLicenseDetail,
-  driverLicenseDetailUpdate
-} from '@/api/transit'
+import { driverLicenseDetail, driverLicenseDetailUpdate } from '@/api/transit'
 import ImageUpload from '@/components/ImgUpload/index.vue'
 import Cookies from 'js-cookie'
 export default {
@@ -234,6 +250,7 @@ export default {
   },
   data() {
     return {
+      loading: false,
       imageUrl: '',
       dialogVisible: false,
       diasbledImg: true,
@@ -291,6 +308,7 @@ export default {
     },
     // 获取司机驾驶证信息
     async getList(id) {
+      this.loading = true
       const { data: res } = await driverLicenseDetail(id)
       this.driverLicens.id = res.id
       this.driverLicens.licenseNumber = res.licenseNumber
@@ -308,6 +326,7 @@ export default {
         : ''
       this.diasbledImg = !res.picture
       this.driverLicens.userId = res.userId
+      this.loading = true
     },
     // 编辑基本信息
     async handleEditDriverLicense() {
@@ -496,6 +515,11 @@ export default {
       }
     }
   }
+  .form-item.data {
+    /deep/.el-input--prefix .el-input__inner {
+      padding-left: 15px;
+    }
+  }
   .form-box {
     border: 0 !important;
     /deep/ .el-card__body {
@@ -536,9 +560,9 @@ export default {
             padding-left: 20px !important;
           }
           .span-title {
-            min-width: 100px;
+            min-width: 110px;
             font-weight: 400;
-            text-align: right;
+            text-align: right !important;
             color: #20232a;
             font-size: 14px;
           }
@@ -567,8 +591,15 @@ export default {
     }
     .cancel-btn {
       width: 110px;
+      color: #2a2929;
+      border: 1px solid #d8dde3;
       border-radius: 5px;
       font-weight: 400;
+      &:hover {
+        background: #ffeeeb;
+        border: 1px solid #f3917c;
+        color: #e15536;
+      }
     }
   }
 }
@@ -621,7 +652,7 @@ export default {
 /deep/ .el-dialog {
   height: 600px;
 }
-/deep/ .el-date-editor{
-  width:auto!important;
+/deep/ .el-date-editor {
+  width: auto !important;
 }
 </style>
