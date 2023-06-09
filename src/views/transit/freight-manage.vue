@@ -2,69 +2,340 @@
 <template>
   <div class="dashboard-container waybill-list customer-list-box">
     <div class="freight">
-      <el-button
-        class="btn-add"
-        size="mini"
-        type="primary"
-        @click="addPermission1"
-      >新增模板</el-button>
-      <el-table
-        class="el-tables"
-        default-expand-all
-        :data="list"
-        row-key="id"
-      >
-        <el-table-column
-          prop="name"
-          label="模板类型"
-        />
-        <el-table-column
-          prop="code"
-          label="运送类型"
-        />
-        <el-table-column
-          prop="description"
-          label="关联城市"
-        />
-        <el-table-column
-          prop="description"
-          label="首重"
-        />
-        <el-table-column
-          prop="description"
-          label="续重"
-        />
-        <el-table-column
-          prop="description"
-          label="轻抛系重"
-        />
-        <el-table-column label="操作">
-          <template v-slot="{ row }">
-            <el-button
-              v-if="row.type === 1"
-              size="mini"
-              type="text"
-              @click="addPermission2(row.id)"
-            >添加</el-button>
-            <el-button
-              size="mini"
-              type="text"
-              @click="editPermission(row.id)"
-            >编辑{{ row.id }}</el-button>
-            <el-button
-              size="mini"
-              type="text"
-              @click="delPermission(row.id)"
-            >删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+      <div class="tables">
+        <el-button
+          class="btn-add"
+          size="mini"
+          type="primary"
+          @click="addtemplate"
+        >新增模板</el-button>
+
+        <el-table
+          class="el-tables"
+          style="width: 100%"
+          :data="list"
+          row-key="id"
+          width="500px"
+        >
+          <el-table-column
+            prop="templateType"
+            label="模板类型"
+          />
+          <el-table-column
+            prop="transportType"
+            label="运送类型"
+          />
+          <el-table-column
+            prop="associatedCityList"
+            label="关联城市"
+          />
+          <el-table-column
+            prop="firstWeight"
+            label="首重"
+          />
+          <el-table-column
+            prop="continuousWeight"
+            label="续重"
+          />
+          <el-table-column
+            prop="lightThrowingCoefficient"
+            label="轻抛系重"
+          />
+          <el-table-column
+            label="操作"
+            align="center"
+          >
+            <template v-slot="{row}">
+              <el-button
+                size="mini"
+                type="text"
+                @click="posttemplate(row.id)"
+              >编辑
+              </el-button>
+              <span style="color:#ccc">|</span>
+              <el-button
+                size="mini"
+                type="text"
+                style="color: red;"
+                @click="delfreights(row.id)"
+              >删除
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
     </div>
+    <!-- 放置一个弹层 用来编辑新增节点 -->
+    <el-dialog
+      :title="`${id ? '编辑' : '新增'}模板`"
+      :visible.sync="dialogVisible"
+      width="540px"
+      :before-close="handleClose"
+    >
+      <!-- 表单 -->
+      <el-form
+        ref="form"
+        :model="form"
+        :rules="rules"
+        label-width="110px"
+      >
+        <el-form-item
+          label="模板类型"
+          prop="templateType"
+        >
+          <el-select
+            v-model="form.templateType"
+            placeholder="请选择模板类型"
+            clearable
+            style="width: 410px"
+          >
+            <el-option
+              label="同城寄"
+              value="1"
+            ></el-option>
+            <el-option
+              label="省内寄"
+              value="2"
+            ></el-option>
+            <el-option
+              label="经济区互寄"
+              value="3"
+            ></el-option>
+            <el-option
+              label="跨省"
+              value="4"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item
+          label="运送类型"
+          prop="transportType"
+        >
+          <el-select
+            v-model="form.transportType"
+            placeholder="请选择运送类型"
+            clearable
+            style="width: 410px"
+          >
+            <el-option
+              label="普快"
+              value="1"
+            ></el-option>
+            <el-option
+              label="特快"
+              value="2"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item
+          v-model="form.associatedCityList"
+          label="关联城市"
+          prop="associatedCityList"
+        >
+          全国
+        </el-form-item>
+
+        <el-form-item
+          label="首重价格"
+          prop="firstWeight"
+        >
+          <el-input
+            v-model.number="form.firstWeight"
+            placeholder="请输入首重价格"
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item
+          label="续重价格"
+          prop="continuousWeight"
+        >
+          <el-input
+            v-model.number="form.continuousWeight"
+            placeholder="请输入续重价格"
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item
+          label="轻抛价格"
+          prop="lightThrowingCoefficient"
+        >
+          <el-input
+            v-model.number="form.lightThrowingCoefficient"
+            placeholder="请输入轻抛系数"
+          ></el-input>
+        </el-form-item>
+
+        <span
+          style="display: flex; justify-content: center;"
+        >
+          <el-button
+            type="primary"
+            style=" background-color:#e15536"
+            @click="queding"
+          >确 定</el-button>
+          <el-button @click="btnCancel">取 消</el-button>
+        </span>
+      </el-form>
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
-export default {}
+import { getFreightList, delfreight, addfreight } from '@/api/freightManage'
+export default {
+  data() {
+    return {
+      id: null,
+      list: [], // 获取数据
+      dialogVisible: false,
+      options: [],
+      form: {
+        templateType: '', // 模板类型
+        transportType: '', // 运送类型
+        associatedCityList: [], // 关联城市
+        continuousWeight: '', // 续重价格
+        firstWeight: '', // 首重价格
+        id: '',
+        lightThrowingCoefficient: '', // 轻抛价格
+        delivery: false,
+        type: [],
+        city: ''
+      },
+      // 输入框校验
+      rules: {
+        templateType: [{ required: true, message: '请选择模板类型', trigger: 'blur' }],
+        transportType: [{ required: true, message: '清选择运送类型', trigger: 'blur' }],
+        // associatedCityList: [{ required: true, message: '全国', trigger: 'blur' }],
+        firstWeight: [{ required: true, message: '首重价格不能为空', trigger: 'blur' }, { type: 'number', message: '首重必须为数字值' }],
+        continuousWeight: [{ required: true, message: '续重价格不能为空', trigger: 'blur' }, { type: 'number', message: '续重必须为数字值' }],
+        lightThrowingCoefficient: [{ required: true, message: '轻抛系数不能为空', trigger: 'blur' }, { type: 'number', message: '轻抛系数必须为数字值' }]
+      }
+    }
+  },
+  created() {
+    this.getList()// 获取运费列表
+  },
+  methods: {
+    // 对话框
+    handleClose(done) {
+      // this.$confirm('确认关闭？')
+      //   .then(_ => {
+      this.$refs.form.resetFields() // 重置表单
+
+      done()
+      // })
+      // .catch(_ => {})
+    },
+    // 获取数据
+    async getList() {
+      const { data } = await getFreightList()
+      // console.log(data, '111111')
+      this.list = data
+      this.list.forEach(e => {
+        // 模板 数字判断字符串
+        if (e.templateType === 1) {
+          e.templateType = '同城寄'
+        } else if (e.templateType === 2) {
+          e.templateType = '省内寄'
+        } else if (e.templateType === 3) {
+          e.templateType = '经济区互寄'
+        } else if (e.templateType === 4) {
+          e.templateType = '跨省'
+        }
+        // 运送 数字判断字符串
+        e.transportType === 1 ? (e.transportType = '普快') : (e.transportType = '特快')
+        // 关联 数字判断字符串
+        e.associatedCityList === 1 ? (e.associatedCityList = '全国') : (e.associatedCityList = '京津冀')
+      })
+    },
+    // 添加
+    async addtemplate() {
+      this.id = null
+      this.dialogVisible = true
+    },
+    // 编辑
+    async posttemplate(id) {
+      this.dialogVisible = true
+      this.id = id
+      this.form.id = id
+      const { data } = await getFreightList()
+      this.form = data[0]
+      console.log(this.form)
+      if (this.form.templateType === 1) {
+        this.form.templateType = '同城寄'
+      } else if (this.form.templateType === 2) {
+        this.form.templateType = '省内寄'
+      } else if (this.form.templateType === 3) {
+        this.form.templateType = '经济区互寄'
+      } else if (this.form.templateType === 4) {
+        this.form.templateType = '跨省'
+      }
+      // 运送 数字判断字符串
+      this.form.transportType === 1 ? (this.form.transportType = '普快') : (this.form.transportType = '特快')
+      // 关联 数字判断字符串
+      this.form.associatedCityList === 1 ? (this.form.associatedCityList = '全国') : (this.form.associatedCityList = '京津冀')
+    },
+    // 删除
+    async  delfreights(id) {
+      // 删除请求
+      await delfreight(id)
+      // 提示信息
+      this.$message.success('删除成功')
+      // 重新获取数据
+      this.getList()
+    },
+    // 确认的时候
+    queding() {
+      this.$refs.form.validate(async(isok) => {
+        console.log(111)
+        if (isok) {
+          if (this.form.id) {
+            // 发编辑请求的时候需要把字符串重新转回数字 ，不然请求参数错误500
+            if (this.form.templateType === '同城寄') {
+              this.form.templateType = 1
+            } else if (this.form.templateType === '省内寄') {
+              this.form.templateType = 2
+            } else if (this.form.templateType === '经济区互寄') {
+              this.form.templateType = 3
+            } else if (this.form.templateType === '跨省') {
+              this.form.templateType = 4
+            }
+            // 运送
+            this.form.transportType === '普快' ? (this.form.transportType = 1) : (this.form.transportType = 2)
+            // 关联
+            this.form.associatedCityList === '全国' ? (this.form.associatedCityList = 1) : (this.form.associatedCityList = [2])
+
+            const res = await addfreight(this.form)
+            if (res.msg === 'ok') {
+              this.$message.success('编辑成功')
+            } else {
+              this.$message.error(res.msg)
+            }
+          } else {
+            // 发起添加请求
+            const res = await addfreight(this.form)
+            if (res.msg === 'ok') {
+              this.$message.success('添加成功')
+            } else {
+              this.$message.error(res.msg)
+            }
+          }
+          this.dialogVisible = false
+          // 重新获取列表数据
+          this.getList()
+        }
+      })
+    },
+    // 关闭的时候
+    btnCancel() {
+      this.dialogVisible = false
+      this.$refs.form.resetFields() // 重置表单
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped rel="stylesheet/scss">
@@ -80,6 +351,9 @@ export default {}
     background-color: #fff;
     margin: 20px;
     // border-radius: 10px;
+    .tables{
+      width: 96%;
+    }
     .btn-add {
       width: 100px;
       height: 40px;
@@ -91,8 +365,11 @@ export default {}
     }
     .el-tables{
       margin-left: 25px;
-
     }
+.ipt{
+    position: absolute;
+
+}
   }
 }
 </style>
