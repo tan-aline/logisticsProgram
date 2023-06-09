@@ -4,78 +4,44 @@
     class="dashboard-container vehicle-detail"
   >
     <div class="box">
-      <!-- 上面 -->
-      <div class="top">
-        <el-menu
-          class="el-menu-demo"
-          mode="horizontal"
-          background-color="#545c64"
-          text-color="#fff"
-          active-text-color="#ffd04b"
-          @select="handleSelect"
+      <el-tabs
+        v-model="activeName"
+        @tab-click="handleClick"
+      >
+        <el-tab-pane
+          label="基本信息"
+          name="first"
         >
-          <el-menu-item index="1">基本信息</el-menu-item>
-          <el-menu-item index="2">行驶证信息</el-menu-item>
-        </el-menu>
-      </div>
-      <!-- 中间 -->
-      <div class="center">
-        <el-row :gutter="24">
-          <el-col :span="8"><div class="grid-content bg-purple">车辆编号：{{ form.id }}</div></el-col>
-          <el-col :span="8"><div class="grid-content bg-purple">车牌号码：{{ form.licensePlate }} </div></el-col>
-          <el-col :span="8"><div class="grid-content bg-purple">车型名称：{{ form.truckTypeName }} </div></el-col>
-        </el-row>
-        <el-row :gutter="24">
-          <el-col :span="8"><div class="grid-content bg-purple">车辆体积： {{ form.allowableVolume }} m³</div></el-col>
-          <el-col :span="8"><div class="grid-content bg-purple">车牌载重： {{ form.allowableLoad }} 吨</div></el-col>
-          <el-col :span="8"><div class="grid-content bg-purple">GPSID: {{ form.deviceGpsId }}</div></el-col>
-        </el-row>
-        <div class="center-top">
-          <span>图片信息:</span>  <img src=""></div>
-
-      </div>
-      <!-- 下面 -->
-      <div class="footer"><el-button class="danger">编辑</el-button></div>
+          <vehicleInfo></vehicleInfo>
+        </el-tab-pane>
+        <el-tab-pane
+          label="行驶证信息"
+          name="second"
+        >
+          <vehicleDriving></vehicleDriving>
+        </el-tab-pane>
+      </el-tabs>
     </div>
   </div>
 </template>
 <script>
-import { getTrucker } from '@/api/vehicle'
+import vehicleInfo from './components/vehicle-info.vue'
+import vehicleDriving from './components/vehicle-driving-license.vue'
 export default {
+  components: {
+    vehicleInfo,
+    vehicleDriving
+  },
   data() {
     return {
-      value: '',
-      form: {
-        id: '',
-        licensePlate: '',
-        truckTypeName: '',
-        allowableVolume: null,
-        allowableLoad: null,
-        deviceGpsId: ''
-      }
+      activeName: 'second'
     }
-  },
-  mounted() {
-    this.value = this.$route.query.id
-    this.initData(this.value)
   },
   methods: {
-    async initData(value) {
-      console.log(value)
-      const res = await getTrucker(value)
-      console.log(res.data)
-      this.form.id = res.data.id
-      this.form.licensePlate = res.data.licensePlate
-      this.form.truckTypeName = res.data.truckTypeName
-      this.form.allowableVolume = res.data.allowableVolume
-      this.form.allowableLoad = res.data.allowableLoad
-      this.form.deviceGpsId = res.data.deviceGpsId
-    },
-    handleSelect(key, keyPath) {
-      console.log(key, keyPath)
+    handleClick(tab, event) {
+      console.log(tab, event)
     }
   }
-
 }
 </script>
 <style lang="scss" scoped>
@@ -95,7 +61,7 @@ export default {
   }
   .center {
     width: 100%;
-    height: 80%;
+    height: 90%;
     border-bottom: 1px solid #ccc;
     .center-top {
       height: 120px;

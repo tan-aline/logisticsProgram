@@ -39,9 +39,15 @@
     </div>
     <!-- 全部 -->
     <div class="header-to">
-      <div><el-button @click="truck">全部 {{ total }}</el-button> </div>
-      <div><el-button @click="usable">可用 {{ usables }}</el-button> </div>
-      <div><el-button @click="outOfservice">停用 {{ service }}</el-button></div>
+      <div
+        @click="truck"
+      >全部 {{ totals }} </div>
+      <div
+        @click="usable"
+      >可用 {{ usables }} </div>
+      <div
+        @click="outOfservice"
+      >停用 {{ service }}</div>
     </div>
     <!-- 表格 -->
     <el-card class="box-card">
@@ -61,7 +67,6 @@
           :data="tableData"
           highlight-current-row
           style="width: 100%"
-          @current-change="handleCurrentChange"
         >
           <el-table-column
             label="序号"
@@ -122,10 +127,12 @@
               <el-button
                 type="text"
                 size="small"
+                @click="open"
               >启用</el-button>
               <el-button
                 type="text"
                 size="small"
+                @click="bind(scope.row.id)"
               >配置司机</el-button>
             </template>
           </el-table-column>
@@ -206,14 +213,93 @@
         <el-button @click="resetTrucker">取 消</el-button>
       </span>
     </el-dialog>
+    <!-- 配置司机 -->
+    <el-dialog
+      title="配置司机"
+      :visible.sync="configurationDriver"
+      width="40%"
+    >
+      <div class="box">
+        <!-- 司机详情 -->
+        <div class="box-top">
+          <el-row>
+            <el-col :span="12"><div class="grid-content bg-purple">车牌号：{{ form.licensePlate }}</div></el-col>
+            <el-col :span="12"><div class="grid-content bg-purple-light">车型：{{ form.truckTypeName }}</div></el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="12"><div class="grid-content bg-purple">车辆状态：{{ form.workStatus=== 1 ? "启用" : "停用" }} </div></el-col>
+            <el-col :span="12"><div class="grid-content bg-purple-light">实载重量：{{ form.allowableLoad }} 吨</div></el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="12"><div class="grid-content bg-purple">实载体积：{{ form.allowableVolume }} m³</div></el-col>
+          </el-row>
+        </div>
+        <!-- 下拉框 -->
+        <div class="box-select">
+          <el-form label-width="80px">
+            <el-form-item label="配置司机">
+              <el-select
+                v-model="value"
+                placeholder="请输入司机名称"
+              >
+                <el-option
+                  v-for="item in options"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                >
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-form>
+        </div>
+        <!-- 表格 -->
+        <div class="box-footer">
+          <el-table
+            highlight-current-row
+            style="width: 100%"
+          >
+            <el-table-column
+              type="index"
+              label="序号"
+              width="100"
+            >
+            </el-table-column>
+            <el-table-column
+              property="date"
+              label="司机名称"
+            >
+            </el-table-column>
+            <el-table-column
+              property="address"
+              label="操作"
+            >
+            </el-table-column>
+          </el-table>
+        </div>
+      </div>
+      <span
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button
+          type="primary"
+          @click="configurationDriver = false"
+        >确 定</el-button>
+        <el-button @click="configurationDriver = false">取 消</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
-import { getvehicles, getTruckTypeld, addTrucker } from '@/api/vehicle'
+import { getvehicles, getTruckTypeld, addTrucker, getTrucker } from '@/api/vehicle'
 export default {
   name: 'Vehicle',
   data() {
     return {
+      // 状态值
+      status: 'all',
+      activeName: 'second',
       options: [], // 车辆类型数组
       value: '', // 车辆类型
       License: '', // 车辆号码
@@ -221,7 +307,9 @@ export default {
       usables: 0, // 可用车辆数量
       service: 0, // 停用车辆数量
       total: 0, // 总数量
+      totals: 0, // 总数量
       dialogVisible: false, // 新增车辆弹框
+      configurationDriver: false, // 司机配置弹框
       truckForm: {
         page: 1,
         pageSize: 5
@@ -238,6 +326,15 @@ export default {
           { pattern: /^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-HJ-NP-Z][A-HJ-NP-Z0-9]{4,5}[A-HJ-NP-Z0-9挂学警港澳]$/, message: '车牌格式不正确', trigger: 'blur' }
         ],
         deviceGpsId: [{ required: true, message: '请输入GPS设备ID', trigger: 'blur' }]
+      },
+      form: {
+        id: '',
+        licensePlate: '',
+        truckTypeName: '',
+        allowableVolume: null,
+        allowableLoad: null,
+        deviceGpsId: '',
+        workStatus: 0
       }
     }
   },
@@ -255,8 +352,10 @@ export default {
     },
     // 获取车辆类型列表  全部
     async truck() {
+      this.status = 'all'
       const res = await getTruckTypeld(this.truckForm)
       this.total = Number(res.data.counts) // 获取总数
+      this.totals = Number(res.data.counts) // 获取总数
       this.tableData = res.data.items// 获取数组
     },
     // 重置车辆选择
@@ -267,6 +366,7 @@ export default {
     // 搜索车辆
     async search(id) {
       console.log(id)
+      this.status = 'search'
       const res = await getTruckTypeld({
         page: this.truckForm.page,
         pageSize: this.truckForm.pageSize,
@@ -278,6 +378,7 @@ export default {
     },
     // 可用的车辆
     async usable() {
+      this.status = 'able'
       const res = await getTruckTypeld({
         page: this.truckForm.page,
         pageSize: this.truckForm.pageSize,
@@ -289,6 +390,7 @@ export default {
     },
     // 停用的车辆
     async outOfservice() {
+      this.status = 'disable'
       const res = await getTruckTypeld({
         page: this.truckForm.page,
         pageSize: this.truckForm.pageSize,
@@ -328,20 +430,79 @@ export default {
           }
         })
     },
-    setCurrent(row) {
-      this.$refs.singleTable.setCurrentRow(row)
+    requestType() {
+      if (this.status === 'all') {
+        this.truck()
+      } else if (this.status === 'able') {
+        this.usable()
+      } else if (this.status === 'disable') {
+        this.outOfservice()
+      } else {
+        this.search(this.value)
+      }
     },
     // 每页多少条
     handleSizeChange(val) {
+      // truck---全部
+      // usable---可用
+      // outOfservice---停用
       console.log(`每页 ${val} 条`)
       this.truckForm.pageSize = val
-      this.truck()
+      this.requestType()
     },
     // 当前多少页
     handleCurrentChange(val) {
       console.log(`当前页: ${val}`)
       this.truckForm.page = val
-      this.truck()
+      this.requestType()
+    },
+    // 启用弹框
+    open() {
+      this.$confirm('确认要启用吗？车辆启用需满足以下条件： <div class="rsdsa"><span>1 车辆信息已完善</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>2 绑定司机>=2,且有排班</span> </div>', '车辆启用', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        dangerouslyUseHTMLString: true,
+        type: 'warning'
+      }).then(() => {
+        this.$message({
+          type: 'error',
+          message: '请先绑定2个司机'
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消'
+        })
+      })
+    },
+    // 配置司机
+    bind(id) {
+      this.$confirm('配置司机需满足以下条件： <div class="rsdsa"><span>1 车辆信息已完善</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>2 车辆无未完成运输任务</span> </div>', '车辆配置', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        dangerouslyUseHTMLString: true,
+        type: 'warning'
+      }).then(async() => {
+        this.configurationDriver = true
+        const res = await getTrucker(id)
+        console.log(res.data)
+        this.form.id = res.data.id
+        this.form.licensePlate = res.data.licensePlate
+        this.form.truckTypeName = res.data.truckTypeName
+        this.form.allowableVolume = res.data.allowableVolume
+        this.form.allowableLoad = res.data.allowableLoad
+        this.form.deviceGpsId = res.data.deviceGpsId
+        this.form.workStatus === res.data.workStatus
+        console.log(id)
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消'
+        })
+      })
+    },
+    handleClick(tab) {
+      console.log(tab)
     }
   }
 }
@@ -432,6 +593,7 @@ export default {
 .header-to {
   margin-top: 20px;
   height: 50px;
+  line-height: 50px;
   background-color: #fff;
   display: flex;
   div {
@@ -439,7 +601,12 @@ export default {
     height: 50px;
     line-height: 50px;
     text-align: center;
+    background-color: #fff;
   }
+}
+.active {
+    background-color: #ffeeeb;
+    color: #e15536;
 }
 .block{
   text-align: center;
@@ -449,7 +616,25 @@ export default {
   align-items: center;
   margin-bottom: 5px;
 }
-
+.box {
+  height: 500px;
+  .box-top {
+    height: 130px;
+    background-color: #fbfafa;
+  }
+  .box-select {
+    margin-top: 20px;
+  }
+  .box-footer {
+    margin-top: 20px;
+  }
+}
+::v-deep .el-dialog__footer {
+  text-align: center;
+}
+.el-card__body  {
+  margin-bottom: 20px;
+}
 // 下拉框
 /deep/ .el-select {
   width: 100%;
@@ -473,6 +658,24 @@ export default {
 
   .box-card {
     margin-top: 20px;
+    padding-bottom: 30px;
+  }
+    .el-row {
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  .el-col {
+    border-radius: 4px;
+  }
+  .grid-content {
+    border-radius: 4px;
+    min-height: 36px;
+    line-height: 36px;
+  }
+  .row-bg {
+    padding: 10px 0;
+    background-color: #f9fafc;
   }
 </style>
 
@@ -500,4 +703,5 @@ export default {
   text-align: center;
   margin-top: 10px;
 }
+
 </style>

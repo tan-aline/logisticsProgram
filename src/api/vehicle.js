@@ -12,3 +12,6 @@ export const addTrucker = (obj) => createAPI('/truck', 'post', obj)
 
 // 获取车辆详情
 export const getTrucker = (id) => createAPI(`/truck/${id}`, 'get')
+
+// 获取已经停用的车辆
+export const getTruckerStopped = () => createAPI('/unWorkingTrucks', 'get',)
