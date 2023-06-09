@@ -67,7 +67,7 @@
     </div>
     <!-- 放置一个弹层 用来编辑新增节点 -->
     <el-dialog
-      :title="`${id ? '编辑' : '新增'}模板`"
+      :title="`${form.id ? '编辑' : '新增'}模板`"
       :visible.sync="dialogVisible"
       width="540px"
       :before-close="handleClose"
@@ -188,10 +188,8 @@ import { getFreightList, delfreight, addfreight } from '@/api/freightManage'
 export default {
   data() {
     return {
-      id: null,
       list: [], // 获取数据
-      dialogVisible: false,
-      options: [],
+      dialogVisible: false, // 控制提示框的开关
       form: {
         templateType: '', // 模板类型
         transportType: '', // 运送类型
@@ -221,18 +219,12 @@ export default {
   methods: {
     // 对话框
     handleClose(done) {
-      // this.$confirm('确认关闭？')
-      //   .then(_ => {
       this.$refs.form.resetFields() // 重置表单
-
       done()
-      // })
-      // .catch(_ => {})
     },
     // 获取数据
     async getList() {
       const { data } = await getFreightList()
-      // console.log(data, '111111')
       this.list = data
       this.list.forEach(e => {
         // 模板 数字判断字符串
@@ -253,17 +245,21 @@ export default {
     },
     // 添加
     async addtemplate() {
-      this.id = null
+      // 添加是id为null 用于判断form表单的title
+      this.form.id = null
+      // 打开对话框
       this.dialogVisible = true
     },
     // 编辑
     async posttemplate(id) {
+      // 打开对话框
       this.dialogVisible = true
-      this.id = id
+      // 编辑的时候传id用于判断form表单的title
       this.form.id = id
       const { data } = await getFreightList()
       this.form = data[0]
       console.log(this.form)
+      // 拿到的数据是数字 要转成对应的字符串
       if (this.form.templateType === 1) {
         this.form.templateType = '同城寄'
       } else if (this.form.templateType === 2) {
@@ -289,8 +285,8 @@ export default {
     },
     // 确认的时候
     queding() {
+      // 确定的时候 校验表单
       this.$refs.form.validate(async(isok) => {
-        console.log(111)
         if (isok) {
           if (this.form.id) {
             // 发编辑请求的时候需要把字符串重新转回数字 ，不然请求参数错误500
@@ -323,7 +319,10 @@ export default {
               this.$message.error(res.msg)
             }
           }
+          // 关闭对话框
           this.dialogVisible = false
+          this.$refs.form.resetFields() // 重置表单
+
           // 重新获取列表数据
           this.getList()
         }
