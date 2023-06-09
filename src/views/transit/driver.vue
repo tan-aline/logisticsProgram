@@ -9,25 +9,4 @@ export default {
   name: 'Courses'
 }
 </script>
-<style rel="stylesheet/scss" lang="scss" scoped>
-.alert {
-  margin: 10px 0px;
-}
-.pagination {
-  margin-top: 40px;
-}
-// 下拉框
-/deep/ .el-select {
-  width: 100%;
-}
-
-/deep/ .el-card{
-  overflow: initial;
-}
-.box {
-  width: 200px;
-  height: 200px;
-  background-color: red;
-}
-</style>
 

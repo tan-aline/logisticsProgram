@@ -212,7 +212,7 @@
                 :example-list="['https://yjy-slwl-oss.oss-cn-hangzhou.aliyuncs.com/086942c3-6c43-432d-80f1-64f53b424be9.png','https://yjy-slwl-oss.oss-cn-hangzhou.aliyuncs.com/4002ebba-8a62-4a5c-b64c-358189456eb6.png']"
                 @imageChange="imageChange"
               >
-                注：图片大小不超过5M；仅能上传 PNG JPEG JPG类型图片；建议上传400*300尺寸的图片；最多上传2张
+                注：图片大小不超过5M ；仅能上传 PNG JPEG JPG类型图片；建议上传400*300尺寸的图片；最多上传2张
               </ImageUpload>
               <div
                 v-else
