@@ -8,6 +8,7 @@
     >
       <!--表单 -->
       <el-form
+        ref="addAListOfModels"
         :model="addAListOfModels"
         :rules="rules"
         status-icon
@@ -195,11 +196,17 @@ export default {
       this.$emit('refresh') // 向父组件发送自定义事件，刷新车型列表
     },
     addOrEdit(title) {
-      if (title === '新增车型') {
-        this.addVehicleType() // 调用 addVehicleType 方法
-      } else {
-        this.updateVehicleType() // 调用 updateVehicleType 方法
-      }
+      this.$refs.addAListOfModels.validate((val) => {
+        if (val) {
+          if (title === '新增车型') {
+            this.addVehicleType() // 调用 addVehicleType 方法
+          } else {
+            this.updateVehicleType() // 调用 updateVehicleType 方法
+          }
+        } else {
+          this.$message.warning('请填写完整信息')
+        }
+      })
     },
     async getCar() {
       if (this.title === '编辑车型') {
