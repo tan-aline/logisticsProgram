@@ -1,6 +1,10 @@
 <!-- 排班设置页 -->
 <template>
   <div class="dashboard-container waybill-list customer-list-box">
+    <el-button
+      class="btn-add"
+      type="primary"
+    >添加工作模式</el-button>
 
   </div>
 </template>

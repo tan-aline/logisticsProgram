@@ -1,6 +1,7 @@
 <!-- 司机详情基本信息 -->
 <template>
   <el-container
+    v-loading="loading"
     class="customer-details-box"
     :class="isShow?'read':'edit'"
   >
@@ -99,16 +100,15 @@ import { driverDetail, driverDetailUpdate } from '@/api/transit'
 export default {
   data() {
     return {
-      disabled: true,
-      pdfData: {
-        bizType: 'driver'
-      },
+      loading: false,
       isShow: true,
-      dialogVisible: false,
+      // 控制显示 input
+      disabled: true,
       disabledName: true,
       disabledMobile: true,
       disabledAge: true,
       disabledAvatar: true,
+      // 提交数据
       driverInfos: {
         id: '',
         name: '',
@@ -134,6 +134,7 @@ export default {
     },
     // 获取司机详情基本信息
     async getList(id) {
+      this.loading = true
       const { data: res } = await driverDetail(id)
       this.driverInfos.id = res.userId
       this.driverInfos.name = res.name
@@ -148,6 +149,7 @@ export default {
       this.driverInfos.mobile = res.mobile
       this.driverInfos.age = res.age
       this.driverInfos.avatar = res.avatar
+      this.loading = false
     },
     // 编辑基本信息
     async handleEditDriverInfo() {
@@ -281,7 +283,7 @@ export default {
           .span-title {
             min-width: 80px;
             font-weight: 400;
-            text-align: right;
+            text-align: right !important;
             color: #20232a;
             font-size: 14px;
           }
