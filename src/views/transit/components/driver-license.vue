@@ -363,6 +363,7 @@ export default {
           .join(),
         userId: this.driverLicens.userId
       }
+      console.log(data, '111111111111111111111')
       await driverLicenseDetailUpdate(data)
         .then((res) => {
           if (String(res.code) === '200') {

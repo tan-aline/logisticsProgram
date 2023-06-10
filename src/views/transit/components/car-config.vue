@@ -72,6 +72,13 @@
             >删除</el-button>
           </template>
         </el-table-column>
+        <template slot="empty">
+          <img
+            style="height: 80px;margin-top: 10px;"
+            src="../../../assets/empty.png"
+          >
+          <p style="margin: 0;padding: 0;margin-top: -30px;">空空如也</p>
+        </template>
       </el-table>
     </div>
 
