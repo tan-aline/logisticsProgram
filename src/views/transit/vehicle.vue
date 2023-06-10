@@ -45,7 +45,7 @@
         <div :class="{ active: status === 'able' }">可用 {{ usables }}</div>
       </div>
       <div @click="outOfservice">
-        <div :class="{active:status === 'disable' }">停用 {{ service }}</div>
+        <div :class="{ active: status === 'disable' }">停用 {{ service }}</div>
       </div>
     </div>
     <!-- 表格 -->
@@ -94,8 +94,10 @@
             label="车辆状态"
           >
             <template v-slot="{ row }">
-              <span v-if="row.workStatus === 1"><span class="aaa">11</span>启用</span>
-              <span v-else><span class="bbb">11</span>停用</span>
+              <span
+                v-if="row.workStatus === 1"
+              ><span class="aaa"></span>启用</span>
+              <span v-else><span class="bbb"></span>停用</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -123,11 +125,22 @@
                 size="small"
                 @click="ViewDetails(scope.row.id)"
               >查看详情</el-button>
-              <el-button
-                type="text"
-                size="small"
-                @click="open"
-              >启用</el-button>
+              <template>
+                <el-button
+                  v-if="scope.row.workStatus === 0"
+                  type="text"
+                  size="small"
+                  @click="open"
+                >启用
+                </el-button>
+                <el-button
+                  v-else
+                  type="text"
+                  size="small"
+                  @click="open"
+                >停用
+                </el-button>
+              </template>
               <el-button
                 type="text"
                 size="small"
@@ -196,7 +209,7 @@
           prop="deviceGpsId"
         >
           <el-input
-            v-model="formLabelAlign.deviceGpsId"
+            v-model.trim="formLabelAlign.deviceGpsId"
             placeholder="请输入GPS设备ID"
           ></el-input>
         </el-form-item>
@@ -237,7 +250,7 @@
             <el-col
               :span="12"
             ><div class="grid-content bg-purple">
-              车辆状态：{{ form.workStatus === 1 ? '启用' : '停用' }}
+              车辆状态：{{ form.workStatus === 0 ? '启用' : '停用' }}
             </div></el-col>
             <el-col
               :span="12"
@@ -364,7 +377,7 @@ export default {
         allowableVolume: null,
         allowableLoad: null,
         deviceGpsId: '',
-        workStatus: 0
+        workStatus: null
       }
     }
   },
@@ -532,8 +545,8 @@ export default {
           this.form.allowableVolume = res.data.allowableVolume
           this.form.allowableLoad = res.data.allowableLoad
           this.form.deviceGpsId = res.data.deviceGpsId
-          this.form.workStatus === res.data.workStatus
-          console.log(id)
+          this.form.workStatus = res.data.workStatus
+          console.log(this.form.workStatus)
         })
         .catch(() => {
           this.$message({
@@ -655,14 +668,16 @@ export default {
   border-radius: 50%;
   background-color: #1dc779;
   color: #1dc779;
-    margin-right: 5px;
+  margin-right: 5px;
+  display: inline-block;
 }
 .bbb {
   width: 5px;
   height: 5px;
-   border-radius: 50%;
+  border-radius: 50%;
   background-color: #e15536;
   color: #e15536;
+  display: inline-block;
   margin-right: 5px;
 }
 .block {
