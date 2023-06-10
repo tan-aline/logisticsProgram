@@ -3,7 +3,6 @@
   <div class="dashboard-container vehicle customer-list-box">
     <!-- 头部 -->
     <div class="header">
-
       <div class="left">
         <span>车辆类型：</span>
         <el-select
@@ -39,15 +38,15 @@
     </div>
     <!-- 全部 -->
     <div class="header-to">
-      <div
-        @click="truck"
-      >全部 {{ totals }} </div>
-      <div
-        @click="usable"
-      >可用 {{ usables }} </div>
-      <div
-        @click="outOfservice"
-      >停用 {{ service }}</div>
+      <div @click="truck">
+        <div :class="{ active: status === 'all' }">全部 {{ totals }}</div>
+      </div>
+      <div @click="usable">
+        <div :class="{ active: status === 'able' }">可用 {{ usables }}</div>
+      </div>
+      <div @click="outOfservice">
+        <div :class="{active:status === 'disable' }">停用 {{ service }}</div>
+      </div>
     </div>
     <!-- 表格 -->
     <el-card class="box-card">
@@ -89,14 +88,14 @@
           <el-table-column
             prop="driverNum"
             label="司机数量"
-          >
-          </el-table-column>
+          > </el-table-column>
           <el-table-column
             prop="workStatus"
             label="车辆状态"
           >
             <template v-slot="{ row }">
-              <span>{{ row.workStatus=== 1 ? "启用" : "停用" }}</span>
+              <span v-if="row.workStatus === 1"><span class="aaa">11</span>启用</span>
+              <span v-else><span class="bbb">11</span>停用</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -223,15 +222,35 @@
         <!-- 司机详情 -->
         <div class="box-top">
           <el-row>
-            <el-col :span="12"><div class="grid-content bg-purple">车牌号：{{ form.licensePlate }}</div></el-col>
-            <el-col :span="12"><div class="grid-content bg-purple-light">车型：{{ form.truckTypeName }}</div></el-col>
+            <el-col
+              :span="12"
+            ><div class="grid-content bg-purple">
+              车牌号：{{ form.licensePlate }}
+            </div></el-col>
+            <el-col
+              :span="12"
+            ><div class="grid-content bg-purple-light">
+              车型：{{ form.truckTypeName }}
+            </div></el-col>
           </el-row>
           <el-row>
-            <el-col :span="12"><div class="grid-content bg-purple">车辆状态：{{ form.workStatus=== 1 ? "启用" : "停用" }} </div></el-col>
-            <el-col :span="12"><div class="grid-content bg-purple-light">实载重量：{{ form.allowableLoad }} 吨</div></el-col>
+            <el-col
+              :span="12"
+            ><div class="grid-content bg-purple">
+              车辆状态：{{ form.workStatus === 1 ? '启用' : '停用' }}
+            </div></el-col>
+            <el-col
+              :span="12"
+            ><div class="grid-content bg-purple-light">
+              实载重量：{{ form.allowableLoad }} 吨
+            </div></el-col>
           </el-row>
           <el-row>
-            <el-col :span="12"><div class="grid-content bg-purple">实载体积：{{ form.allowableVolume }} m³</div></el-col>
+            <el-col
+              :span="12"
+            ><div class="grid-content bg-purple">
+              实载体积：{{ form.allowableVolume }} m³
+            </div></el-col>
           </el-row>
         </div>
         <!-- 下拉框 -->
@@ -273,8 +292,7 @@
             <el-table-column
               property="address"
               label="操作"
-            >
-            </el-table-column>
+            > </el-table-column>
           </el-table>
         </div>
       </div>
@@ -292,7 +310,12 @@
   </div>
 </template>
 <script>
-import { getvehicles, getTruckTypeld, addTrucker, getTrucker } from '@/api/vehicle'
+import {
+  getvehicles,
+  getTruckTypeld,
+  addTrucker,
+  getTrucker
+} from '@/api/vehicle'
 export default {
   name: 'Vehicle',
   data() {
@@ -323,9 +346,16 @@ export default {
       rules: {
         licensePlate: [
           { required: true, message: '请输入车牌号码', trigger: 'blur' },
-          { pattern: /^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-HJ-NP-Z][A-HJ-NP-Z0-9]{4,5}[A-HJ-NP-Z0-9挂学警港澳]$/, message: '车牌格式不正确', trigger: 'blur' }
+          {
+            pattern:
+              /^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领][A-HJ-NP-Z][A-HJ-NP-Z0-9]{4,5}[A-HJ-NP-Z0-9挂学警港澳]$/,
+            message: '车牌格式不正确',
+            trigger: 'blur'
+          }
         ],
-        deviceGpsId: [{ required: true, message: '请输入GPS设备ID', trigger: 'blur' }]
+        deviceGpsId: [
+          { required: true, message: '请输入GPS设备ID', trigger: 'blur' }
+        ]
       },
       form: {
         id: '',
@@ -340,9 +370,9 @@ export default {
   },
   created() {
     this.vehicle() // 车辆类型
-    this.usable()// 可用车辆
-    this.outOfservice()// 停用车辆
-    this.truck()// 全部
+    this.usable() // 可用车辆
+    this.outOfservice() // 停用车辆
+    this.truck() // 全部
   },
   methods: {
     // 获取页面车辆类型数据
@@ -356,7 +386,7 @@ export default {
       const res = await getTruckTypeld(this.truckForm)
       this.total = Number(res.data.counts) // 获取总数
       this.totals = Number(res.data.counts) // 获取总数
-      this.tableData = res.data.items// 获取数组
+      this.tableData = res.data.items // 获取数组
     },
     // 重置车辆选择
     reset() {
@@ -386,7 +416,7 @@ export default {
       })
       this.total = Number(res.data.counts)
       this.usables = Number(res.data.counts)
-      this.tableData = res.data.items// 获取数组
+      this.tableData = res.data.items // 获取数组
     },
     // 停用的车辆
     async outOfservice() {
@@ -398,14 +428,14 @@ export default {
       })
       this.total = Number(res.data.counts)
       this.service = Number(res.data.counts)
-      this.tableData = res.data.items// 获取数组
+      this.tableData = res.data.items // 获取数组
     },
     // 添加车辆弹框
     add() {
       this.dialogVisible = true
     },
     // 确认添加车辆
-    async addTrucker () {
+    async addTrucker() {
       await addTrucker(this.formLabelAlign)
       this.$message.success('添加车辆成功')
       this.resetTrucker()
@@ -422,13 +452,12 @@ export default {
     },
     // 查看详情
     ViewDetails(id) {
-      this.$router.push(
-        {
-          name: 'vehicle-detail',
-          query: {
-            id
-          }
-        })
+      this.$router.push({
+        name: 'vehicle-detail',
+        query: {
+          id
+        }
+      })
     },
     requestType() {
       if (this.status === 'all') {
@@ -458,48 +487,60 @@ export default {
     },
     // 启用弹框
     open() {
-      this.$confirm('确认要启用吗？车辆启用需满足以下条件： <div class="rsdsa"><span>1 车辆信息已完善</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>2 绑定司机>=2,且有排班</span> </div>', '车辆启用', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        dangerouslyUseHTMLString: true,
-        type: 'warning'
-      }).then(() => {
-        this.$message({
-          type: 'error',
-          message: '请先绑定2个司机'
+      this.$confirm(
+        '确认要启用吗？车辆启用需满足以下条件： <div class="rsdsa"><span>1 车辆信息已完善</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>2 绑定司机>=2,且有排班</span> </div>',
+        '车辆启用',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          dangerouslyUseHTMLString: true,
+          type: 'warning'
+        }
+      )
+        .then(() => {
+          this.$message({
+            type: 'error',
+            message: '请先绑定2个司机'
+          })
         })
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消'
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消'
+          })
         })
-      })
     },
     // 配置司机
     bind(id) {
-      this.$confirm('配置司机需满足以下条件： <div class="rsdsa"><span>1 车辆信息已完善</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>2 车辆无未完成运输任务</span> </div>', '车辆配置', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        dangerouslyUseHTMLString: true,
-        type: 'warning'
-      }).then(async() => {
-        this.configurationDriver = true
-        const res = await getTrucker(id)
-        console.log(res.data)
-        this.form.id = res.data.id
-        this.form.licensePlate = res.data.licensePlate
-        this.form.truckTypeName = res.data.truckTypeName
-        this.form.allowableVolume = res.data.allowableVolume
-        this.form.allowableLoad = res.data.allowableLoad
-        this.form.deviceGpsId = res.data.deviceGpsId
-        this.form.workStatus === res.data.workStatus
-        console.log(id)
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消'
+      this.$confirm(
+        '配置司机需满足以下条件： <div class="rsdsa"><span>1 车辆信息已完善</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>2 车辆无未完成运输任务</span> </div>',
+        '车辆配置',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          dangerouslyUseHTMLString: true,
+          type: 'warning'
+        }
+      )
+        .then(async () => {
+          this.configurationDriver = true
+          const res = await getTrucker(id)
+          console.log(res.data)
+          this.form.id = res.data.id
+          this.form.licensePlate = res.data.licensePlate
+          this.form.truckTypeName = res.data.truckTypeName
+          this.form.allowableVolume = res.data.allowableVolume
+          this.form.allowableLoad = res.data.allowableLoad
+          this.form.deviceGpsId = res.data.deviceGpsId
+          this.form.workStatus === res.data.workStatus
+          console.log(id)
         })
-      })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消'
+          })
+        })
     },
     handleClick(tab) {
       console.log(tab)
@@ -564,7 +605,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  .left{
+  .left {
     width: 40%;
     height: 60px;
     margin-left: 20px;
@@ -576,7 +617,7 @@ export default {
       border-radius: 8px;
     }
   }
-  .center{
+  .center {
     width: 30%;
     height: 60px;
     input {
@@ -585,7 +626,7 @@ export default {
       border-radius: 8px;
     }
   }
-  .right{
+  .right {
     width: 30%;
     height: 60px;
   }
@@ -594,21 +635,37 @@ export default {
   margin-top: 20px;
   height: 50px;
   line-height: 50px;
-  background-color: #fff;
   display: flex;
+  background-color: #fff;
   div {
     width: 120px;
     height: 50px;
     line-height: 50px;
     text-align: center;
     background-color: #fff;
+    .active {
+      background-color: #eebbb2;
+      color: white;
+    }
   }
 }
-.active {
-    background-color: #ffeeeb;
-    color: #e15536;
+.aaa {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #1dc779;
+  color: #1dc779;
+    margin-right: 5px;
 }
-.block{
+.bbb {
+  width: 5px;
+  height: 5px;
+   border-radius: 50%;
+  background-color: #e15536;
+  color: #e15536;
+  margin-right: 5px;
+}
+.block {
   text-align: center;
   height: 60px;
   display: flex;
@@ -632,49 +689,49 @@ export default {
 ::v-deep .el-dialog__footer {
   text-align: center;
 }
-.el-card__body  {
+.el-card__body {
   margin-bottom: 20px;
 }
 // 下拉框
 /deep/ .el-select {
   width: 100%;
 }
-  .text {
-    font-size: 14px;
-  }
-  .item {
-    margin-bottom: 18px;
-  }
-  .clearfix:before,
-  .clearfix:after {
-    display: table;
-    content: "";
-  }
-  .clearfix:after {
-    clear: both
-  }
+.text {
+  font-size: 14px;
+}
+.item {
+  margin-bottom: 18px;
+}
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  content: '';
+}
+.clearfix:after {
+  clear: both;
+}
 
-  .box-card {
-    margin-top: 20px;
-    padding-bottom: 30px;
+.box-card {
+  margin-top: 20px;
+  padding-bottom: 30px;
+}
+.el-row {
+  &:last-child {
+    margin-bottom: 0;
   }
-    .el-row {
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-  .el-col {
-    border-radius: 4px;
-  }
-  .grid-content {
-    border-radius: 4px;
-    min-height: 36px;
-    line-height: 36px;
-  }
-  .row-bg {
-    padding: 10px 0;
-    background-color: #f9fafc;
-  }
+}
+.el-col {
+  border-radius: 4px;
+}
+.grid-content {
+  border-radius: 4px;
+  min-height: 36px;
+  line-height: 36px;
+}
+.row-bg {
+  padding: 10px 0;
+  background-color: #f9fafc;
+}
 </style>
 
 <style>
@@ -701,5 +758,4 @@ export default {
   text-align: center;
   margin-top: 10px;
 }
-
 </style>
