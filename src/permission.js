@@ -1,4 +1,4 @@
-/* eslint-disable indent */
+// /* eslint-disable indent */
 // import router from './router'
 // import store from './store'
 // import { Message } from 'element-ui'
@@ -20,3 +20,4 @@
 //     // finish progress bar
 //     NProgress.done()
 // })
+
