@@ -133,6 +133,7 @@
               <el-button
                 type="warning"
                 class="search-button"
+                :disabled="loading ? true : false"
                 @click="searchSomeone"
               >搜索</el-button>
               <el-button
@@ -229,16 +230,16 @@
               </template>
             </el-table-column>
           </template>
-          <div slot="empty">
-            <el-empty
-              :image="imgUrl"
-              :image-size="330"
-              description="没有找到您要的内容哦~"
-            ></el-empty>
-          </div>
+          <template slot="empty">
+            <img
+              style="width: 60%; height: 60%"
+              :src="imgUrl"
+            />
+            <p style="margin: 0;padding: 0;margin-top: -30px;">空空如也~</p>
+          </template>
         </el-table>
         <div
-          v-if="tableData.length !== 0"
+          v-if="tableData && tableData.length !== 0"
           class="pagination"
         >
           <el-pagination
