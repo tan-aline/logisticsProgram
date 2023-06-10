@@ -164,7 +164,7 @@ export default {
     },
     // 上传成功
     handleAvatarSuccess(response, file, fileList) {
-      console.log(response, file, fileList, 'response, file, fileList')
+      console.log(response, file, fileList, 'response, file, fileList', '上传成功')
       this.fileList = fileList.filter((item) => {
         // 由于无法触发失败的上传钩子，所以这里对数据进行筛选，防止出现上传失败的图片依然在上传列表显示
         return !item.size || (item.size && Boolean(item.response.code === 200))
