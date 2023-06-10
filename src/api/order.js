@@ -17,3 +17,10 @@ export const updateOrder = (id, data) => createAPI(`/order-manager/order/${id}`,
 export const getOrderTrackApi = (id) => createAPI(`transport-order-manager/track/${id}`, 'get')
 // 获取地区manager/areas/children?parentId=1
 export const orderCity = (id) => createAPI(`/areas/children?parentId=${id}`, 'get')
+// 下拉框/goodsType/simple
+export const getSlectList = () => createAPI('/goodsType/simple', 'get')
+// 更新表单保存/order-manager/cargo/
+export const putTable = (id, data) => createAPI(`/order-manager/cargo/${id}`, 'put', data)
+// 删除表单/order-manager/cargo/
+export const delTable = id => createAPI(`/order-manager/cargo/${id}`, 'delete')
+

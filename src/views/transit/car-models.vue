@@ -4,7 +4,10 @@
       class="searchBox"
     >
       <!-- 搜索卡片 -->
-      <el-card class="search-card">
+      <el-card
+        class="search-card"
+        style="margin: 20px;"
+      >
         <!-- 搜索表单 -->
         <el-form
           :inline="true"
@@ -67,10 +70,14 @@
           </el-form-item>
           <el-form-item class="form-item">
             <el-button
-              type="primary"
+              type="warning"
               @click="searchData"
             >搜索</el-button>
-            <el-button @click="reset">重置</el-button>
+            <el-button
+              class="cancel"
+              style="padding: 13px 30px;"
+              @click="reset"
+            >重置</el-button>
           </el-form-item>
           <!-- 搜索表单 -->
         </el-form>
@@ -78,9 +85,12 @@
       <!-- 搜索卡片 -->
 
       <!-- 表单卡片 -->
-      <el-card class="box-card">
+      <el-card
+        class="box-card"
+        style="margin: 20px;"
+      >
         <el-button
-          type="primary"
+          type="warning"
           style="float: left"
           @click="increaseTheNumberOfVehicles"
         >新增车型</el-button>
@@ -383,6 +393,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.cancel {
+  color: #2a2929;
+  border: 1px solid #d8dde3;
+  border-radius: 5px;
+  font-weight: 400;
+  &:hover {
+    background: #ffeeeb;
+    border: 1px solid #f3917c;
+    color: #e15536;
+  }
+}
 .search-card {
   padding: 20px;
 

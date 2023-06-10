@@ -331,39 +331,96 @@
           >
             <div class="main-waprfour">
               <el-button
-                style="margin-left: 30px;margin-top: 20px;"
+                v-if="orderList.orderCargoDTOS.length"
+                style="margin-left: 30px;
+                margin-top: 20px;"
                 type="danger"
-              >+新增</el-button>
+                @click="addtable"
+              >+新增
+              </el-button>
               <el-table
-                :data="datalist"
+                :data="tableList"
+                stripe
+                show-summary
                 style="width: 100%;margin: 20px;"
               >
                 <el-table-column
                   prop="date"
+                  type="index"
                   label="序号"
-                  width="180"
+                  width="70"
                 >
                 </el-table-column>
                 <el-table-column
-                  prop="name"
+                  prop="name.toString()"
                   label="货品名称"
-                  width="180"
                 >
+                  <template slot-scope="scope">
+                    <el-input
+                      v-if="scope.row.isEdit"
+                      v-model="scope.row.name"
+                      clearable
+                      size="mini"
+                    />
+                    <span v-else>
+                      {{ scope.row.name.toString() }}
+                    </span>
+                  </template>
                 </el-table-column>
                 <el-table-column
-                  prop="address"
+                  prop="goodsType.name"
                   label="货品类型"
                 >
+                  <template slot-scope="scope">
+                    <el-select
+                      v-if="scope.row.isEdit"
+                      v-model="scope.row.goodsType.name"
+                      clearable
+                      size="mini"
+                    >
+                      <el-option
+                        v-for="item in orderOptions"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.name"
+                      >
+                      </el-option>
+                    </el-select>
+                    <span v-else>
+                      {{ scope.row.goodsType.name }}
+                    </span>
+                  </template>
                 </el-table-column>
                 <el-table-column
-                  prop="address"
+                  prop="totalWeight"
                   label="重量（千克）"
                 >
+                  <template slot-scope="scope">
+                    <el-input
+                      v-if="scope.row.isEdit"
+                      v-model="scope.row.totalWeight"
+                      clearable
+                      size="mini"
+                    />
+                    <span v-else>
+                      {{ scope.row.totalWeight }}
+                    </span>
+                  </template>
                 </el-table-column>
                 <el-table-column
-                  prop="address"
+                  prop="totalVolume"
                   label="体积（立方）"
-                >
+                ><template slot-scope="scope">
+                  <el-input
+                    v-if="scope.row.isEdit"
+                    v-model="scope.row.totalVolume"
+                    clearable
+                    size="mini"
+                  />
+                  <span v-else>
+                    {{ scope.row.totalVolume }}
+                  </span>
+                </template>
                 </el-table-column>
                 <el-table-column
                   prop="address"
@@ -371,14 +428,35 @@
                   width="150"
                 >
                   <template slot-scope="scope">
+                    <div v-if="scope.row.isEdit">
+                      <el-button
+                        type="text"
+                        size="mini"
+                        @click="handleConfirm(scope)"
+                      >确定</el-button>
+                      <el-divider direction="vertical"></el-divider>
+                      <el-button
+                        type="text"
+                        size="mini"
+                        @click="scope.row.isEdit = false;isOpen=true"
+                      >取消</el-button>
+                    </div>
                     <el-button
+                      v-if="!scope.row.isEdit"
                       type="text"
                       size="small"
                       @click="handleClick(scope.row)"
                     >编辑</el-button>
+                    <el-divider
+                      v-if="!scope.row.isEdit"
+                      direction="vertical"
+                    ></el-divider>
                     <el-button
+                      v-if="!scope.row.isEdit"
+                      style="color: #f56c6c;"
                       type="text"
                       size="small"
+                      @click="orderOpen(scope.row.id)"
                     >删除</el-button>
                   </template>
                 </el-table-column>
@@ -387,20 +465,26 @@
           </el-collapse-item></el-collapse>
       </footer>
       <el-button
+        v-if="orderList.orderCargoDTOS.length"
         style="
           margin-left: 50%;
+          margin-bottom: 40px;
           transform: translateX(-50%);
-          margin-bottom: 40px;"
+          "
         type="danger"
+        @click="save"
       >保存</el-button>
     </div>
   </div>
 </template>
 <script>
-import { orderDetail, getOrderTrackApi } from '@/api/order'
+import { orderDetail, getOrderTrackApi, getSlectList,
+  putTable, delTable, updateOrder } from '@/api/order'
 export default {
   data() {
     return {
+      inside: 0,
+      outsiade: 1,
       activeNames: ['1'],
       activeNames2: ['1'],
       activeNames3: ['1'],
@@ -410,15 +494,25 @@ export default {
       paisong: ['1'],
       datalist: [],
       orderList: {},
+      tableList: [],
       isShow: false,
       // 地图
       center: { lng: 116.3, lat: 39.9 },
-      zoom: 6.5
+      zoom: 6.5,
+      // 下拉框
+      orderOptions: [],
+      // 下拉框
+      yLis: [],
+      // 设置开启
+      isOpen: true
     }
   },
   created() {
     this.getorderlist()
     this.getguiji()
+    this.$nextTick(() => {
+      console.log(this.$refs['bianji'])
+    })
   },
   methods: {
 
@@ -426,10 +520,17 @@ export default {
       try {
         if (this.$route.params.id) {
           const res = await orderDetail(this.$route.params.id)
+
+          res.data.orderCargoDTOS.forEach(item => {
+            // if (!item.isEdit) {
+            item.isEdit = false
+            // }
+          })
           this.orderList = { ...this.orderList, ...res.data }
           // this.orderList = res.data
+          // 表格数据
+          this.tableList = res.data.orderCargoDTOS
           this.isShow = true
-          console.log(this.orderList, this.orderList.status)
         }
       } catch (error) {
         console.log(error)
@@ -438,14 +539,109 @@ export default {
     // 订单轨迹
     async getguiji() {
       if (this.$route.params.id) {
-        const res = await getOrderTrackApi(this.$route.params.id)
-        console.log(res)
+        await getOrderTrackApi(this.$route.params.id)
       }
     },
     // 地图
     handler ({ BMap, map }) {
       this.center.lng = this.orderList.senderProvince.lng
       this.center.lat = this.orderList.senderProvince.lat
+    },
+    // 编辑
+    async handleClick(row) {
+      // this.isOpen = row.isEdit
+      if (this.isOpen) {
+        const res = await getSlectList()
+        this.orderOptions = res.data
+        row.isEdit = true
+        this.isOpen = false
+      } else if (!this.isOpen) {
+        this.$message({
+          showClose: true,
+          message: '请先保存数据',
+          type: 'warning'
+        })
+      }
+    },
+    // 点击确定
+    async handleConfirm(scope) {
+      const id = scope.row.id
+      const index = scope.$index
+      const res = await putTable(id, this.tableList[index])
+      console.log(res)
+      scope.row.isEdit = false
+      // console.log(this.tableList)
+      this.isOpen = false
+    },
+    // 新增--没找到请求是假的
+    async addtable() {
+      const res = await getSlectList()
+      this.orderOptions = res.data
+      const arr = {
+        cargoBarcode: '',
+        cargoValue: 0,
+        goodsType: {
+          defaultVolume: null,
+          defaultWeight: null,
+          id: '1552846618315661323',
+          name: '运动',
+          remark: null,
+          status: 1,
+          truckTypes: null
+
+        },
+        id: '1667007583717249026',
+        name: '',
+        quantity: null,
+        remark: '',
+        totalVolume: null,
+        totalWeight: null,
+        unit: '',
+        volume: 0,
+        weight: 0
+
+      }
+      this.inside = this.tableList.length
+      this.outside = this.tableList.length
+      arr.id = this.inside
+      arr.goodsType.id = this.outsiade
+      arr.isEdit = true
+      this.tableList.push(arr)
+      console.log(this.tableList)
+    },
+    // 点击删除
+    orderOpen(id) {
+      this.$confirm('确定要删除货品吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async() => {
+        await delTable(id)
+        // 真正的删除刷新
+        // if (this.$route.params.id) {
+        //   const res = await orderDetail(this.$route.params.id)
+        //   this.tableList = res.data.orderCargoDTOS
+        // }
+        // 新增--没找到请求是假的 所以这里是假的
+        this.tableList.splice(id, 1)
+        console.log(this.tableList)
+        // this.handleClick()
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+    // 点击保存
+    async save() {
+      const res = await
+      updateOrder(this.$route.params.id, this.orderList)
+      this.tableList = res.data.orderCargoDTOS
     }
   }
 }
@@ -516,35 +712,29 @@ export default {
     .main-waprtwo p{
       margin-left: 45px;
       margin-top: 35px;
+      min-width: 90%;
+    }
+    .main-waprtwo p{
+      display: flex;
+      span{
+        width: 355px;
+      }
+    // }
+    // .main-waprtwo p:nth-child(2){
+    //   display: flex;
+    //   span{
+    //     width: 355px;
 
-    }
-    .main-waprtwo p:nth-child(1){
-      display: flex;
-      span{
-        width: 420px;
-      }
-    }
-    .main-waprtwo p:nth-child(2){
-      display: flex;
-      span{
-        width: 400px;
-      }
+    //   }
     }
     // 派送信息
     .main-waprfive p{
       margin-left: 45px;
       margin-top: 35px;
-    }
-    .main-waprfive p:nth-child(1){
+      min-width: 90%;
       display: flex;
       span{
-        width: 420px;
-      }
-    }
-    .main-waprfive p:nth-child(2){
-      display: flex;
-      span{
-        width: 284px;
+        width: 355px;
       }
     }
   .main-waprthree p{
@@ -556,8 +746,10 @@ export default {
     }
   }
   footer{
-    height: 350px;
     margin-bottom: 20px;
+  }
+  ::v-deep .has-gutter tr th:nth-last-child(2) .cell{
+    text-align: center;
   }
   </style>
   <style rel="stylesheet/scss" lang="scss" scoped>
