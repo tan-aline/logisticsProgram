@@ -1,10 +1,8 @@
 <template>
   <div class="dashboard-container car-models customer-list-box">
-    <div class="searchBox">
-      <el-backtop
-        :bottom="100"
-        :right="50"
-      ></el-backtop>
+    <div
+      class="searchBox"
+    >
       <!-- 搜索卡片 -->
       <el-card class="search-card">
         <!-- 搜索表单 -->
@@ -69,13 +67,10 @@
           </el-form-item>
           <el-form-item class="form-item">
             <el-button
-              type="warning"
+              type="primary"
               @click="searchData"
             >搜索</el-button>
-            <el-button
-              type="warning"
-              @click="reset"
-            >重置</el-button>
+            <el-button @click="reset">重置</el-button>
           </el-form-item>
           <!-- 搜索表单 -->
         </el-form>
@@ -85,12 +80,14 @@
       <!-- 表单卡片 -->
       <el-card class="box-card">
         <el-button
-          type="warning"
+          type="primary"
           style="float: left"
           @click="increaseTheNumberOfVehicles"
         >新增车型</el-button>
         <!-- Table 表格 -->
         <el-table
+          v-loading="loading"
+          element-loading-text="拼命加载中"
           :data="vehicleList"
           stripe
         >
@@ -138,12 +135,15 @@
           <el-table-column label="操作">
             <template v-slot="{ row }">
               <el-button
+                type="text"
                 size="mini"
+                style="color: #419eff"
                 @click="editTheCarModel(row)"
               >编辑</el-button>
+              <el-divider direction="vertical"></el-divider>
               <el-button
                 size="mini"
-                type="danger"
+                type="text"
                 @click="deleteAVehicle(row)"
               >删除</el-button>
             </template>
@@ -195,6 +195,7 @@ export default {
   },
   data() {
     return {
+      loading: true,
       formInline: {
         // 搜索表单数据
         id: '',
@@ -312,19 +313,22 @@ export default {
     },
     async fetchData() {
       // 获取数据
-      const { data } = await getVehiclePagingData(this.pageList) // 调用 getVehiclePagingData 方法，传入分页信息
+      const { data } = await getVehiclePagingData({
+        ...this.pageList,
+        ...this.formInline
+      }) // 调用 getVehiclePagingData 方法，传入分页信息
       this.vehicleList = data.items // 将获取到的车型列表赋值给 vehicleList
       this.total = +data.counts // 将获取到的车型总数赋值给 total
+      this.loading = false
     },
     async deleteAVehicle(row) {
       // 删除车型
-      try {
-        await deleteVehicleType(row.id) // 调用 deleteVehicleType 方法，传入车型 ID
+      const res = await deleteVehicleType(row.id) // 调用 deleteVehicleType 方法，传入车型 ID
+      if (res.code === 1) {
+        this.$message.warning('车型中有使用的车辆，不可以删除')
+      } else {
         this.$message.success('删除成功') // 显示成功提示
         this.fetchData() // 调用 fetchData 方法，获取数据
-      } catch (error) {
-        console.log(error)
-        this.$message.warning('请检查')
       }
     },
     increaseTheNumberOfVehicles() {
@@ -348,23 +352,31 @@ export default {
         pageSize: 10
       }
       this.formInline = {}
+      this.loading = true
       this.fetchData()
     },
     // 定义一个异步方法，用于搜索车型de数据
     async searchData() {
-      // 调用 getVehiclePagingData 方法，传入合并后的分页信息和搜索条件
-      const { data } = await getVehiclePagingData({
-        ...this.formInline,
-        ...this.pageList
-      })
-      // 将获取到的车型列表赋值给 vehicleList
-      this.vehicleList = data.items
-      // 将获取到的车型总数赋值给 total
-      this.total = +data.counts
-      // 将获取到的页码赋值给 pageList 对象的 page 属性
-      this.pageList.page = data.page
-      // 将获取到的每页显示条数赋值给 pageList 对象的 pageSize 属性
-      this.pageList.pageSize = data.pageSize
+      const result = Object.values(this.formInline).some((item) => item !== '')
+      if (result) {
+        // 调用 getVehiclePagingData 方法，传入合并后的分页信息和搜索条件
+        const { data } = await getVehiclePagingData({
+          ...this.formInline,
+          ...this.pageList
+        })
+        // 将获取到的车型列表赋值给 vehicleList
+        this.vehicleList = data.items
+        // 将获取到的车型总数赋值给 total
+        this.total = +data.counts
+        // 将获取到的页码赋值给 pageList 对象的 page 属性
+        this.pageList.page = data.page
+        // 将获取到的每页显示条数赋值给 pageList 对象的 pageSize 属性
+        this.pageList.pageSize = data.pageSize
+        this.loading = true
+        this.fetchData()
+      } else {
+        this.$message.warning('请选择至少一项进行搜索')
+      }
     }
   }
 }
