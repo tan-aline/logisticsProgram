@@ -63,7 +63,7 @@
               <el-button
                 size="mini"
                 type="text"
-                @click="posttemplate(row.id)"
+                @click="posttemplate(row)"
               >编辑
               </el-button>
               <span style="color: #ccc">|</span>
@@ -148,7 +148,7 @@
           label="关联城市"
           prop="associatedCityList"
         >
-          <span v-if="form.templateType === '3'">
+          <span v-if="form.templateType === '经济区互寄'||form.templateType === '3'">
             <el-checkbox-group v-model="form.associatedCityList">
               <el-checkbox label="2">京津冀</el-checkbox>
               <el-checkbox label="3">江浙沪</el-checkbox>
@@ -214,20 +214,26 @@ import { getFreightList, delfreight, addfreight } from '@/api/freightManage'
 export default {
   filters: {
     formateCity(ids) {
-      for (const key in ids) {
-        if (ids[key] === '1') {
-          ids[key] = '全国'
-        } else if (ids[key] === '2') {
-          ids[key] = '京津冀'
-        } else if (ids[key] === '3') {
-          ids[key] = '江浙沪'
-        } else if (ids[key] === '4') {
-          ids[key] = '川渝'
-        } else if (ids[key] === '5') {
-          ids[key] = '黑吉辽'
+      if (ids instanceof Object) {
+        for (const key in ids) {
+          if (ids[key] === '1') {
+            ids[key] = '全国'
+          } else if (ids[key] === '2') {
+            ids[key] = '京津冀'
+          } else if (ids[key] === '3') {
+            ids[key] = '江浙沪'
+          } else if (ids[key] === '4') {
+            ids[key] = '川渝'
+          } else if (ids[key] === '5') {
+            ids[key] = '黑吉辽'
+          }
         }
+        return ids.join(',')
+      } else {
+        return ids
       }
-      return ids.join(',')
+
+      // return ids
       // const newArr = ids.map(item => {
       //   if (item === '1') {
       //     item = '全国'qq
@@ -373,13 +379,13 @@ export default {
       this.dialogVisible = true
     },
     // 编辑
-    async posttemplate(id) {
+    async posttemplate(datas) {
       // 打开对话框
       this.dialogVisible = true
       // 编辑的时候传id用于判断form表单的title
-      this.form.id = id
-      const { data } = await getFreightList()
-      this.form = data[0]
+      this.form.id = datas.id
+      // const { data } = await getFreightList()
+      this.form = datas
       console.log(this.form)
       // 拿到的数据是数字 要转成对应的字符串
       if (this.form.templateType === 1) {
