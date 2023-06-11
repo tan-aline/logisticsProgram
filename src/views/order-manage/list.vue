@@ -69,8 +69,8 @@
                   <el-option
                     v-for="item in statusListOptins"
                     :key="item.id"
-                    :label="item.id"
-                    :value="item.name"
+                    :label="item.name"
+                    :value="item.id"
                   ></el-option>
                 </el-select>
               </el-form-item>
@@ -116,11 +116,11 @@
                 >
                   <el-option
                     label="未付"
-                    value="未付"
+                    value="1"
                   ></el-option>
                   <el-option
                     label="已付"
-                    value="已付"
+                    value="2"
                   ></el-option>
                 </el-select>
               </el-form-item>
@@ -255,8 +255,12 @@
             <el-button
               type="danger"
               @click="submitForm('stateRuleForm')"
-            >立即创建</el-button>
-            <el-button @click="resetForm('stateRuleForm')">重置</el-button>
+            >搜索</el-button>
+            <el-button
+              class="cancel"
+              type="default"
+              @click="resetForm('stateRuleForm')"
+            >重置</el-button>
           </el-form-item>
         </div>
       </el-form>
@@ -271,12 +275,11 @@
     "
     >
       <el-table
+        v-loading="loading"
+        element-loading-text="加载中"
         :data="eltableList"
         style="overflow: auto;
-        margin-top: 20px;
-        margin-left: 20px;
-        margin-right: 20px;
-        width: 97.7%;
+        width: 100%;
         "
         stripe
       >
@@ -382,7 +385,7 @@
         <el-table-column
           prop="pickupType"
           label="取件类型"
-          width="90"
+          width="110"
         >
           <template v-slot="{row}">
             <!-- 1为网点自寄，2为上门取件 -->
@@ -394,7 +397,7 @@
         <el-table-column
           prop="paymentMethod"
           label="付费类型"
-          width="80"
+          width="130"
         >
           <template v-slot="{row}">
             <!-- 付款方式,1.预结2到付 -->
@@ -406,7 +409,7 @@
         <el-table-column
           prop="paymentStatus"
           label="付费状态"
-          width="90"
+          width="110"
         >
           <template v-slot="{row}">
             <!-- 付款状态,1.未付2已付 -->
@@ -418,7 +421,7 @@
         <el-table-column
           fixed="right"
           label="操作"
-          width="80"
+          width="110"
         >
           <template v-slot="{row}">
             <el-button
@@ -428,8 +431,21 @@
             >查看详情</el-button>
           </template>
         </el-table-column>
+        <template
+          slot="empty"
+        >
+          <div>
+            <img
+              v-if="!loading"
+              src="https://fe-slwl-manager.itheima.net/static/img/icon-empty.3abd3b9a.png"
+              width="336"
+              height="232"
+            >
+            <p v-if="!loading">没有找到您要的内容哦~</p>
+          </div>
+        </template>
       </el-table>
-      <template>
+      <template v-if="eltableList">
         <el-pagination
           style="margin-top: 20px;
           transform:translate(-50%,0);
@@ -452,6 +468,7 @@ import { orderCity, orderList } from '@/api/order'
 export default {
   data() {
     return {
+      loading: true,
       labelPosition: 'right',
       statusListOptins: statusListOptins,
       cityList: [],
@@ -480,7 +497,8 @@ export default {
         pageSize: 10,
         total: 0
       },
-      eltableList: []
+      eltableList: [],
+      isOrderShow: false
       // eltableList: {
 
       //   id: null, // 运单编号
@@ -565,6 +583,7 @@ export default {
     async getOrderList() {
       const res = await orderList(this.elarry)
       this.eltableList = res.data.items
+      this.loading = false
       this.elarry.total = +res.data.counts
     },
     // 序号
@@ -627,6 +646,28 @@ export default {
         this.senderaddress3 = ''
       }
     },
+    // 搜索
+    async submitForm() {
+      const res = await orderList({
+        id: this.formLabelAlign.ordernumber, // 订单编号
+        page: this.elarry.page,
+        pageSize: this.elarry.pageSize,
+        paymentStatus: this.formLabelAlign.typeof,
+        pickUpType: '',
+        receiverCityId: this.senderaddress2, // 收件人地址第二个
+        receiverCountyId: this.senderaddress3, // 收件人地址第三个
+        receiverName: this.formLabelAlign.recipientname,
+        receiverPhone: this.formLabelAlign.receiverPhone,
+        receiverProvinceId: this.senderaddress, // 收件人地址第一个
+        senderCityId: this.recipientaddress2, // 发件人地址第二个
+        senderCountyId: this.recipientaddress3, // 发件人地址第三个
+        senderPhone: this.formLabelAlign.senderPhone,
+        senderProvinceId: this.recipientaddress, // 发件人地址第一个
+        status: this.formLabelAlign.status
+
+      })
+      this.eltableList = res.data.items
+    },
     // 重置表单
     resetForm(formName) {
       this.$refs[formName].resetFields()
@@ -637,6 +678,9 @@ export default {
       this.recipientaddress = ''
       this.recipientaddress2 = ''
       this.recipientaddress3 = ''
+      this.eltableList = []
+      this.elarry.page = 1
+      this.getOrderList()
     },
     // 监听 pagesize 改变的事件
     handleSizeChange(newSize) {
@@ -646,6 +690,7 @@ export default {
     // 监听 页码值 改变的事件
     handleCurrentChange(newPage) {
       this.elarry.page = newPage
+      this.loading = true
       this.getOrderList()
     },
     // 点击详情
@@ -657,6 +702,18 @@ export default {
 }
 </script>
 <style rel="stylesheet/scss" lang="scss" scoped>
+.cancel {
+  color: #2a2929;
+  border: 1px solid #d8dde3;
+  border-radius: 5px;
+  font-weight: 400;
+  background-color: #fff;
+  &:hover {
+    background: #ffeeeb;
+    border: 1px solid #f3917c;
+    color: #e15536;
+  }
+}
 .alert {
   margin-top: 25px;
   margin-bottom: 25px;
@@ -705,16 +762,16 @@ background-color: #fff;
   // // background-color: #dde;
   // border-radius: 3px;
   // }
-  ::v-deep .el-table tr td .cell{
-    font-size: 12px;
-}
+//   ::v-deep .el-table tr td .cell{
+//     font-size: 12px;
+// }
  ::v-deep .el-table--scrollable-x .el-table__body-wrapper {
     overflow-x: auto;
 }
-::v-deep .cell{
-  span{
-    font-size: 14px;
-  }
-}
+// ::v-deep .cell{
+//   span{
+//     font-size: 14px;
+//   }
+// }
 </style>
 
