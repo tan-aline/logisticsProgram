@@ -160,23 +160,32 @@
               <div
                 style="margin: 20px;
                   position: relative;
-                  border: 1px solid;
                   height: 700px;"
                 class="main-waprdingdanguiji"
               >
                 <baidu-map
-                  style="height: 700px;width: 100%;"
+                  style="height: 700px;
+                  width: 100%;"
                   class="map"
                   :center="center"
                   :zoom="zoom"
+                  :map-name="mapName"
                   :scroll-wheel-zoom="true"
                   @ready="handler"
                 >
                   <!-- bm-marker 就是标注点 定位在point的经纬度上 跳动的动画 -->
                   <bm-marker
-                    :position="center"
+                    :position="point"
                     animation="BMAP_ANIMATION_BOUNCE"
                   >
+                    <bm-info-window
+                      :show="false"
+                      style="width: 30px !important;
+                      position: relative !important;
+                      border-radius: 10px !important;"
+                    >
+
+                    </bm-info-window>
                   </bm-marker>
 
                 </baidu-map>
@@ -478,6 +487,26 @@
   </div>
 </template>
 <script>
+// 根据地址名称获取经纬度坐标
+function getPointByAddress(address) {
+  // 创建地理编码实例
+  // eslint-disable-next-line no-undef
+  const myGeo = new BMap.Geocoder()
+
+  return new Promise((resolve, reject) => {
+    // 对地址进行地理编码
+    myGeo.getPoint(address, (point) => {
+      if (point) {
+        // 地理编码成功，返回经纬度坐标对象
+        resolve(point)
+      } else {
+        // 地理编码失败
+        reject('地理编码失败')
+      }
+    }, '全国')
+  })
+}
+
 import { orderDetail, getOrderTrackApi, getSlectList,
   putTable, delTable, updateOrder } from '@/api/order'
 export default {
@@ -498,7 +527,10 @@ export default {
       isShow: false,
       // 地图
       center: { lng: 116.3, lat: 39.9 },
-      zoom: 6.5,
+      point: '',
+      // point: { lng: 116.3, lat: 39.9 },
+      zoom: 18,
+      mapName: '',
       // 下拉框
       orderOptions: [],
       // 下拉框
@@ -543,9 +575,18 @@ export default {
       }
     },
     // 地图
-    handler ({ BMap, map }) {
-      this.center.lng = this.orderList.senderProvince.lng
-      this.center.lat = this.orderList.senderProvince.lat
+    async handler ({ BMap, map }) {
+      // this.point.lng = this.orderList.receiverCounty.lng
+      // this.point.lat = this.orderList.receiverCounty.lat
+      this.mapName = '待揽件'
+      this.center = this.orderList.receiverProvince.name +
+this.orderList.receiverCity.name +
+this.orderList.receiverCounty.name +
+this.orderList.receiverAddress
+      // this.point = '四川成都青羊青羊总部基地'
+      const point = await getPointByAddress(this.center)
+      this.point = point
+      console.log(this.point)
     },
     // 编辑
     async handleClick(row) {
@@ -567,11 +608,13 @@ export default {
     async handleConfirm(scope) {
       const id = scope.row.id
       const index = scope.$index
-      const res = await putTable(id, this.tableList[index])
-      console.log(res)
+      await putTable(id, this.tableList[index])
       scope.row.isEdit = false
       // console.log(this.tableList)
       this.isOpen = false
+      // const list =
+      // await postTable(this.tableList[index])
+      // console.log(list)
     },
     // 新增--没找到请求是假的
     async addtable() {
@@ -607,7 +650,6 @@ export default {
       arr.goodsType.id = this.outsiade
       arr.isEdit = true
       this.tableList.push(arr)
-      console.log(this.tableList)
     },
     // 点击删除
     orderOpen(id) {
@@ -624,7 +666,7 @@ export default {
         // }
         // 新增--没找到请求是假的 所以这里是假的
         this.tableList.splice(id, 1)
-        console.log(this.tableList)
+        // console.log(this.tableList)
         // this.handleClick()
         this.$message({
           type: 'success',
@@ -637,16 +679,20 @@ export default {
         })
       })
     },
-    // 点击保存
+    // 点击保存orderCargoDTOS
     async save() {
       const res = await
       updateOrder(this.$route.params.id, this.orderList)
-      this.tableList = res.data.orderCargoDTOS
+      // this.tableList = res.data.orderCargoDTOS
+      // console.log(res.orderCargoDTOS)
+      console.log(this.orderList, res)
+      this.getorderlist()
     }
   }
 }
 </script>
   <style lang="scss" scoped>
+
   .cont{
     margin-left: 10px;
     position: absolute;top: 0;

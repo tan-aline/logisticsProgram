@@ -258,6 +258,7 @@
             >搜索</el-button>
             <el-button
               class="cancel"
+              type="default"
               @click="resetForm('stateRuleForm')"
             >重置</el-button>
           </el-form-item>
@@ -274,6 +275,8 @@
     "
     >
       <el-table
+        v-loading="loading"
+        element-loading-text="加载中"
         :data="eltableList"
         style="overflow: auto;
         width: 100%;
@@ -428,15 +431,21 @@
             >查看详情</el-button>
           </template>
         </el-table-column>
-        <template slot="empty">
-          <img
-            style="height: 180px;margin-top: 10px;"
-            src="../../assets/empty.png"
-          >
-          <p style="margin: 0;padding: 0;margin-top: -30px;">没有找到您要的内容哟</p>
+        <template
+          slot="empty"
+        >
+          <div>
+            <img
+              v-if="!loading"
+              src="https://fe-slwl-manager.itheima.net/static/img/icon-empty.3abd3b9a.png"
+              width="336"
+              height="232"
+            >
+            <p v-if="!loading">没有找到您要的内容哦~</p>
+          </div>
         </template>
       </el-table>
-      <template>
+      <template v-if="eltableList">
         <el-pagination
           style="margin-top: 20px;
           transform:translate(-50%,0);
@@ -459,6 +468,7 @@ import { orderCity, orderList } from '@/api/order'
 export default {
   data() {
     return {
+      loading: true,
       labelPosition: 'right',
       statusListOptins: statusListOptins,
       cityList: [],
@@ -487,7 +497,8 @@ export default {
         pageSize: 10,
         total: 0
       },
-      eltableList: []
+      eltableList: [],
+      isOrderShow: false
       // eltableList: {
 
       //   id: null, // 运单编号
@@ -572,6 +583,7 @@ export default {
     async getOrderList() {
       const res = await orderList(this.elarry)
       this.eltableList = res.data.items
+      this.loading = false
       this.elarry.total = +res.data.counts
     },
     // 序号
@@ -678,6 +690,7 @@ export default {
     // 监听 页码值 改变的事件
     handleCurrentChange(newPage) {
       this.elarry.page = newPage
+      this.loading = true
       this.getOrderList()
     },
     // 点击详情
