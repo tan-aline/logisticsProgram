@@ -158,8 +158,7 @@
           @click="jumpTo"
         >排班设置</el-button>
         <el-button
-          plain
-          type="warning"
+          class="cancel"
           style="margin-bottom: 20px"
           @click="forWork"
         >绑定排班</el-button>
@@ -518,7 +517,18 @@ export default {
     padding-bottom: 40px;
   }
 }
-
+.cancel {
+  color: #2a2929;
+  border: 1px solid #d8dde3;
+  background-color: #fff;
+  border-radius: 5px;
+  font-weight: 400;
+  &:hover {
+    background: #ffeeeb;
+    border: 1px solid #f3917c;
+    color: #e15536;
+  }
+}
 .work-type {
   /deep/ .el-form-item__content {
     margin-left: 40px !important;

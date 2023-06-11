@@ -93,7 +93,7 @@
             v-show="dataList && dataList.length > 0"
             class="pagination"
           >
-            <div class="pages">
+            <div class="pagination">
               <el-pagination
                 :current-page="Number(waybillSearchFormData.page)"
                 :total="Number(total)"
@@ -692,6 +692,20 @@ export default {
     font-weight: bold;
     cursor: pointer;
   }
+  .pagination {
+  margin: 20px 0 0 !important;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  font-size: 14px !important;
+  color: #20232a !important;
+}
   /deep/ .el-tabs__active-bar {
     background-color: #e15536;
   }

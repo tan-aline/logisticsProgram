@@ -116,11 +116,11 @@
                 >
                   <el-option
                     label="未付"
-                    value="未付"
+                    value="1"
                   ></el-option>
                   <el-option
                     label="已付"
-                    value="已付"
+                    value="2"
                   ></el-option>
                 </el-select>
               </el-form-item>
@@ -250,15 +250,14 @@
           </el-row>
         </div>
 
-        <div style="position: absolute;bottom: 0px;">
+        <div style="position: absolute;bottom: -5px;left: -50px;">
           <el-form-item>
             <el-button
-              type="danger"
+              type="warning"
               @click="submitForm('stateRuleForm')"
             >搜索</el-button>
             <el-button
               class="cancel"
-              type="default"
               @click="resetForm('stateRuleForm')"
             >重置</el-button>
           </el-form-item>
@@ -429,6 +428,13 @@
             >查看详情</el-button>
           </template>
         </el-table-column>
+        <template slot="empty">
+          <img
+            style="height: 180px;margin-top: 10px;"
+            src="../../assets/empty.png"
+          >
+          <p style="margin: 0;padding: 0;margin-top: -30px;">没有找到您要的内容哟</p>
+        </template>
       </el-table>
       <template>
         <el-pagination
@@ -689,6 +695,8 @@ export default {
   border-radius: 5px;
   font-weight: 400;
   background-color: #fff;
+  padding-left: 35px;
+  padding-right: 35px;
   &:hover {
     background: #ffeeeb;
     border: 1px solid #f3917c;

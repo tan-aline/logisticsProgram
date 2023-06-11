@@ -21,19 +21,25 @@
       </div>
 
       <div class="center">
-        车牌号码：<input
+        <span style="width: 110px;">车牌号码：</span>
+        <el-input
           v-model="License"
           type="text"
           placeholder="请输入车牌号码"
+          clearable
         />
       </div>
 
       <div class="right">
         <el-button
-          type="danger"
+          type="warning"
           @click="search(value)"
         >搜索</el-button>
-        <el-button @click="reset">重置</el-button>
+        <el-button
+          class="cancel
+        "
+          @click="reset"
+        >重置</el-button>
       </div>
     </div>
     <!-- 全部 -->
@@ -55,8 +61,7 @@
         class="clearfix"
       >
         <el-button
-          type="danger"
-          round
+          type="warning"
           @click="add"
         >新增车辆</el-button>
       </div>
@@ -68,9 +73,10 @@
           style="width: 100%"
         >
           <el-table-column
-            label="序号"
             type="index"
-            width="80"
+            :index="indexAdd"
+            label="序号"
+            width="60"
           >
           </el-table-column>
           <el-table-column
@@ -118,6 +124,7 @@
           <el-table-column
             label="操作"
             width="200"
+            header-align="center"
           >
             <template slot-scope="scope">
               <el-button
@@ -219,6 +226,7 @@
         class="dialog-footer"
       >
         <el-button
+          plain
           type="primary"
           @click="addTrucker"
         >确 定</el-button>
@@ -306,6 +314,13 @@
               property="address"
               label="操作"
             > </el-table-column>
+            <template slot="empty">
+              <img
+                style="height: 80px;margin-top: 10px;"
+                src="../../assets/empty.png"
+              >
+              <p style="margin: 0;padding: 0;margin-bottom: 15px;margin-top: -10px;">空空如也</p>
+            </template>
           </el-table>
         </div>
       </div>
@@ -314,10 +329,14 @@
         class="dialog-footer"
       >
         <el-button
+          class="confirm"
           type="primary"
           @click="configurationDriver = false"
         >确 定</el-button>
-        <el-button @click="configurationDriver = false">取 消</el-button>
+        <el-button
+          class="cancles"
+          @click="configurationDriver = false"
+        >取 消</el-button>
       </span>
     </el-dialog>
   </div>
@@ -388,6 +407,12 @@ export default {
     this.truck() // 全部
   },
   methods: {
+    // 序号
+    indexAdd(index) {
+      const page = this.truckForm.page
+      const pagesize = this.truckForm.pageSize
+      return index + 1 + (page - 1) * pagesize
+    },
     // 获取页面车辆类型数据
     async vehicle() {
       const res = await getvehicles()
@@ -405,6 +430,7 @@ export default {
     reset() {
       this.value = ''
       this.License = ''
+      this.truck()
     },
     // 搜索车辆
     async search(id) {
@@ -580,7 +606,21 @@ export default {
   text-align: left;
   overflow: hidden;
 }
-
+.cancles {
+  color: #2a2929;
+  border: 1px solid #d8dde3;
+  border-radius: 5px;
+  font-weight: 400;
+  &:hover {
+    background: #ffeeeb;
+    border: 1px solid #f3917c;
+    color: #e15536;
+  }
+}
+::v-deep .el-button.el-button--primary {
+    background-color: #e15536;
+    border: 0;
+  }
 .vehicle {
   padding: 0 20px;
   /deep/ .el-dialog__title {
@@ -631,8 +671,10 @@ export default {
     }
   }
   .center {
-    width: 30%;
+    margin-left: -100px;
+    width: 320px;
     height: 60px;
+    display: flex;
     input {
       height: 40px;
       border: 1px solid #ccc;
@@ -656,6 +698,7 @@ export default {
     line-height: 50px;
     text-align: center;
     background-color: #fff;
+    cursor: pointer;
     .active {
       background-color: #eebbb2;
       color: white;
@@ -679,6 +722,20 @@ export default {
   color: #e15536;
   display: inline-block;
   margin-right: 5px;
+}
+.cancel {
+  color: #2a2929;
+  border: 1px solid #d8dde3;
+  border-radius: 5px;
+  font-weight: 400;
+  background-color: #fff;
+  padding-left: 35px;
+  padding-right: 35px;
+  &:hover {
+    background: #ffeeeb;
+    border: 1px solid #f3917c;
+    color: #e15536;
+  }
 }
 .block {
   text-align: center;

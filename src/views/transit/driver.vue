@@ -69,9 +69,12 @@
         class="driver-table-data"
       >
         <el-table-column
-          prop="account"
+          type="index"
+          :index="indexAdd"
           label="序号"
-        > </el-table-column>
+          width="80"
+        >
+        </el-table-column>
         <el-table-column
           prop="account"
           label="司机账号"
@@ -224,6 +227,12 @@ export default {
     this.getOrganizationInfo()
   },
   methods: {
+    // 序号
+    indexAdd(index) {
+      const page = this.info.page
+      const pagesize = this.info.pageSize
+      return index + 1 + (page - 1) * pagesize
+    },
     // 树形结构匹配字段
     normalizer(node) {
       return {

@@ -61,7 +61,7 @@
               type="text"
               size="small"
               class="search"
-              @click="handleClick(scope.row.truckLicenseId)"
+              @click="handleClick(scope.row.id)"
             >查看</el-button>
             <span style="color: #dcdfe6;margin: 0 5px;cursor: default;">|</span>
             <el-button
@@ -153,7 +153,6 @@ export default {
     },
     // 查看
     handleClick(id) {
-      console.log(id)
       this.$router.push(
         {
           name: 'vehicle-detail',

@@ -15,17 +15,18 @@
           :model="formInline"
         >
           <el-form-item
-            label="车辆编号"
+            label="车辆编号："
             class="form-item"
             prop="id"
           >
             <el-input
               v-model="formInline.id"
-              placeholder="请输入车辆编号"
+              placeholder="请输入车辆编号："
+              clearable
             ></el-input>
           </el-form-item>
           <el-form-item
-            label="应载重量"
+            label="应载重量："
             class="form-item"
           >
             <el-select
@@ -42,7 +43,7 @@
             </el-select>
           </el-form-item>
           <el-form-item
-            label="应载体积"
+            label="应载体积："
             class="form-item"
           >
             <el-select
@@ -59,16 +60,17 @@
             </el-select>
           </el-form-item>
           <el-form-item
-            label="车辆类型"
+            label="车辆类型："
             class="form-item"
             prop="name"
           >
             <el-input
               v-model="formInline.name"
               placeholder="请输入车辆类型"
+              clearable
             ></el-input>
           </el-form-item>
-          <el-form-item class="form-item">
+          <div class="form-item btn">
             <el-button
               type="warning"
               @click="searchData"
@@ -78,7 +80,7 @@
               style="padding: 13px 30px;"
               @click="reset"
             >重置</el-button>
-          </el-form-item>
+          </div>
           <!-- 搜索表单 -->
         </el-form>
       </el-card>
@@ -91,7 +93,7 @@
       >
         <el-button
           type="warning"
-          style="float: left"
+          style="margin-bottom: 20px;"
           @click="increaseTheNumberOfVehicles"
         >新增车型</el-button>
         <!-- Table 表格 -->
@@ -102,12 +104,16 @@
           stripe
         >
           <el-table-column
-            label="序号"
             type="index"
-          > </el-table-column>
+            :index="indexAdd"
+            label="序号"
+            width="60"
+          >
+          </el-table-column>
           <el-table-column
             label="车型编号"
             prop="id"
+            width="180"
           > </el-table-column>
           <el-table-column
             label="车辆类型"
@@ -142,7 +148,10 @@
             prop="measureHigh"
           >
           </el-table-column>
-          <el-table-column label="操作">
+          <el-table-column
+            label="操作"
+            header-align="center"
+          >
             <template v-slot="{ row }">
               <el-button
                 type="text"
@@ -310,6 +319,12 @@ export default {
     this.fetchData() // 在组件创建时调用 fetchData 方法，获取数据
   },
   methods: {
+    // 序号
+    indexAdd(index) {
+      const page = this.pageList.page
+      const pagesize = this.pageList.pageSize
+      return index + 1 + (page - 1) * pagesize
+    },
     handleSizeChange(val) {
       // 每页显示条数改变时触发
       this.pageList.pageSize = val // 将每页显示条数赋值给 pageList 对象的 pageSize 属性
@@ -398,6 +413,7 @@ export default {
   border: 1px solid #d8dde3;
   border-radius: 5px;
   font-weight: 400;
+  background-color: #fff;
   &:hover {
     background: #ffeeeb;
     border: 1px solid #f3917c;
@@ -410,7 +426,6 @@ export default {
   .search-form {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
 
     .form-item {
       width: calc(33.33% - 20px);
@@ -423,5 +438,14 @@ export default {
 }
 ::v-deep .el-table .cell {
   padding-right: 0px;
+}
+/* 选中状态 */
+::v-deep .el-pager li.active {
+  color: #e15536;
+}
+
+/* hover 状态 */
+::v-deep .el-pager li:hover {
+  color: #e15536;
 }
 </style>

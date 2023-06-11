@@ -78,16 +78,19 @@
         </el-form-item>
       </el-form>
       <!--表单 -->
-      <span
+      <template
         slot="footer"
         class="dialog-footer"
       >
-        <el-button @click="turnOffTheDisplay">取 消</el-button>
+        <el-button
+          class="cancel"
+          @click="turnOffTheDisplay"
+        >取 消</el-button>
         <el-button
           type="primary"
           @click="addOrEdit(title)"
         >确 定</el-button>
-      </span>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -218,3 +221,20 @@ export default {
   }
 }
 </script>
+<style lang="scss" scoped>
+::v-deep .el-button--primary {
+    background-color: #e15536;
+    border: 0;
+  }
+  .cancel {
+  color: #2a2929;
+  border: 1px solid #d8dde3;
+  border-radius: 5px;
+  font-weight: 400;
+  &:hover {
+    background: #ffeeeb;
+    border: 1px solid #f3917c;
+    color: #e15536;
+  }
+}
+</style>
