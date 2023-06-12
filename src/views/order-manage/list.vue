@@ -271,14 +271,14 @@
       margin-right: 20px;
     margin-bottom: 20px;
     padding-bottom: 60px;
-    overflow: auto;
+    overflow-x: auto;
     "
     >
       <el-table
         v-loading="loading"
         element-loading-text="加载中"
         :data="eltableList"
-        style="overflow: auto;
+        style="overflow-x: auto;
         width: 100%;
         "
         stripe
@@ -293,7 +293,7 @@
         <el-table-column
           prop="id"
           label="订单编号"
-          width="150"
+          width="170"
         >
         </el-table-column>
         <el-table-column
@@ -308,7 +308,7 @@
         <el-table-column
           prop="createTime"
           label="下单时间"
-          width="150"
+          width="160"
         >
         </el-table-column>
         <el-table-column
@@ -341,7 +341,7 @@
         <el-table-column
           prop="senderAddress"
           label="发件人地址"
-          width="140"
+          width="150"
         >
           <template v-slot="{row}">
             {{
@@ -369,7 +369,7 @@
         <el-table-column
           prop="receiverAddress"
           label="收件人地址"
-          width="110"
+          width="130"
         >
           <template v-slot="{row}">
             {{
@@ -397,7 +397,7 @@
         <el-table-column
           prop="paymentMethod"
           label="付费类型"
-          width="130"
+          width="120"
         >
           <template v-slot="{row}">
             <!-- 付款方式,1.预结2到付 -->
@@ -409,7 +409,7 @@
         <el-table-column
           prop="paymentStatus"
           label="付费状态"
-          width="110"
+          width="100"
         >
           <template v-slot="{row}">
             <!-- 付款状态,1.未付2已付 -->
@@ -648,6 +648,7 @@ export default {
     },
     // 搜索
     async submitForm() {
+      this.loading = true
       const res = await orderList({
         id: this.formLabelAlign.ordernumber, // 订单编号
         page: this.elarry.page,
@@ -667,6 +668,7 @@ export default {
 
       })
       this.eltableList = res.data.items
+      this.loading = false
     },
     // 重置表单
     resetForm(formName) {
@@ -680,11 +682,13 @@ export default {
       this.recipientaddress3 = ''
       this.eltableList = []
       this.elarry.page = 1
+      this.loading = true
       this.getOrderList()
     },
     // 监听 pagesize 改变的事件
     handleSizeChange(newSize) {
       this.elarry.pageSize = newSize
+      this.loading = true
       this.getOrderList()
     },
     // 监听 页码值 改变的事件
@@ -753,6 +757,9 @@ background-color: #fff;
 }
 ::v-deep .el-table__body{
   overflow-x: auto;
+}
+::v-deep .el-table_1_column_15.is-leaf .cell{
+  text-align: center;
 }
 // ::v-deep .el-table__body-wrapper::-webkit-scrollbar {
 //   // width: 20px; /* 纵向滚动条 */
