@@ -178,19 +178,22 @@
                     :position="point"
                     animation="BMAP_ANIMATION_BOUNCE"
                   >
-                    <bm-info-window
-                      :show="false"
-                      style="width: 30px !important;
-                      position: relative !important;
-                      border-radius: 10px !important;"
+                    <bm-overlay
+                      pane="labelPane"
+                      :class="{sample: true, active}"
+                      @draw="draw"
+                      @mouseover.native="active = true"
+                      @mouseleave.native="active = false"
                     >
-
-                    </bm-info-window>
+                      <div>
+                        <img src="../../assets/qjdb.png">
+                        <span>待揽件</span>
+                      </div>
+                    </bm-overlay>
                   </bm-marker>
 
                 </baidu-map>
                 <p
-                  p
                   class="cont"
                 >
                   <span>目的地</span>
@@ -536,7 +539,8 @@ export default {
       // 下拉框
       yLis: [],
       // 设置开启
-      isOpen: true
+      isOpen: true,
+      active: false
     }
   },
   created() {
@@ -575,6 +579,7 @@ export default {
       }
     },
     // 地图
+
     async handler ({ BMap, map }) {
       // this.point.lng = this.orderList.receiverCounty.lng
       // this.point.lat = this.orderList.receiverCounty.lat
@@ -587,6 +592,14 @@ this.orderList.receiverAddress
       const point = await getPointByAddress(this.center)
       this.point = point
       console.log(this.point)
+    },
+    // 自定义覆盖物
+    async draw ({ el, BMap, map }) {
+      const point = await getPointByAddress(this.center)
+      this.point = point
+      const pixel = map.pointToOverlayPixel(this.point)
+      el.style.left = pixel.x - 60 + 'px'
+      el.style.top = pixel.y - 20 + 'px'
     },
     // 编辑
     async handleClick(row) {
@@ -693,6 +706,52 @@ this.orderList.receiverAddress
 </script>
   <style lang="scss" scoped>
 
+.sample {
+  width: 120px;
+  height: 40px;
+  line-height: 40px;
+  background: #fff;
+  border-radius: 20px;
+  overflow: visible !important;
+  color: #fff;
+  text-align: center;
+  padding: 10px;
+  border: none;
+  position: absolute;
+  margin-top: -75px;
+  margin-left: -6px;
+  div{
+    display: flex;justify-content: space-around;
+    margin-top: -10px;position: relative;
+  }
+  img{width: 40px;height: 40px;
+    // margin-top: -10px;
+    // margin-left: -30px;
+  }
+  span{
+    color: #000;
+    // display: block;
+    // margin-top: -55px;
+  }
+
+}
+.threelist{
+  margin-right: 2px;
+}
+.sample::before{
+  content: "";
+display: block;
+width: 0;height: 0;
+border: 10px solid transparent;
+border-top-color: #ffffff;
+position: absolute;left: 55px;
+top: 40px;z-index: 9999;
+}
+
+.sample.active {
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+}
   .cont{
     margin-left: 10px;
     position: absolute;top: 0;
