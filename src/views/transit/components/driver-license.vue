@@ -34,7 +34,7 @@
                 maxlength="20"
               />
             </div>
-            <div class="form-item data">
+            <div class="form-item">
               <span class="span-title">初次领证日期：</span>
               <el-date-picker
                 v-model="driverLicens.initialCertificateDate"

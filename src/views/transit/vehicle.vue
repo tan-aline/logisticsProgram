@@ -434,16 +434,18 @@ export default {
     },
     // 搜索车辆
     async search(id) {
-      console.log(id)
-      this.status = 'search'
-      const res = await getTruckTypeld({
-        page: this.truckForm.page,
-        pageSize: this.truckForm.pageSize,
-        truckTypeId: id,
-        licensePlate: this.License
-      })
-      this.total = Number(res.data.counts)
-      this.tableData = res.data.items
+      if (id || this.License) { // 判断点击搜索时是否有值
+        console.log(id)
+        this.status = 'search'
+        const res = await getTruckTypeld({
+          page: this.truckForm.page,
+          pageSize: this.truckForm.pageSize,
+          truckTypeId: id,
+          licensePlate: this.License
+        })
+        this.total = Number(res.data.counts)
+        this.tableData = res.data.items
+      }
     },
     // 可用的车辆
     async usable() {

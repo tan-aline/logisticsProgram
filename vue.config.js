@@ -122,6 +122,14 @@ module.exports = {
         '@': resolve('src')
       }
     }
+    // externals: {
+    //   // 第一个参数是包名，第二个参数是包文件中的全局变量名
+    //   'element-ui': 'ELEMENT',
+    //   'echarts': 'echarts',
+    //   'vue': 'Vue',
+    //   'vue-router': 'VueRouter'
+    //   // 'lodash': '_'
+    // }
   },
   chainWebpack(config) {
     config.plugins.delete('preload') // TODO: need test

@@ -441,6 +441,7 @@ export default {
       this.initData()
     },
     forWork() {
+      console.log(this.checkedData.length)
       if (this.checkedData.length === 0) {
         this.$message.error('请选择调整人员')
       } else {
@@ -453,6 +454,9 @@ export default {
           this.checkedData.push(item.id)
         }
       })
+      if (selection.length === 0) {
+        this.checkedData = []
+      }
     },
     changeRadio() {
       this.workForID = null
